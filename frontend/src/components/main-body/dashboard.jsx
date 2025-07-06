@@ -13,8 +13,7 @@ import { PieChart, Pie, Cell } from "recharts";
 import { AreaChart, Area } from "recharts";
 import { CircularProgress } from "@mui/material";
 
-
-const MainBody = () => {
+const Dashboard = () => {
   const data = [
     { month: "Jan", employees: 45 },
     { month: "Feb", employees: 50 },
@@ -43,14 +42,7 @@ const MainBody = () => {
   const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042"];
 
   return (
-    <Box // Main Body (Connected to Topbar (MUI - Appbar) and Sidebar)
-      sx={{
-        width: "calc(100vw - 245px)",
-        height: "calc(100vh - 70px)",
-        // border: "2px solid white",
-        marginTop: "65px",
-      }}
-    >
+    <>
       {/* This is main */}
 
       {/* Container for 4 box (Upper) */}
@@ -70,11 +62,11 @@ const MainBody = () => {
             background: "#121212",
           }}
         >
-          <Typography variant="h6">Allocation</Typography>
+          <Typography variant="h6" textAlign={"center"}>Allocation</Typography>
           <Box sx={{ marginTop: "20px" }}>
             <Typography>John Doe (M274)</Typography>
             <Typography>Email : john@xyz.com</Typography>
-            <Typography>Designation : Frontend Developer</Typography>
+            <Typography>Designation : Software Engineer</Typography>
             <Typography>Reporting Manager : Andrew Richards</Typography>
           </Box>
 
@@ -130,7 +122,7 @@ const MainBody = () => {
             background: "#121212",
           }}
         >
-          <Typography variant="h6">Upcoming Holidays</Typography>
+          <Typography variant="h6" textAlign={"center"}>Upcoming Holidays</Typography>
           <Box sx={{ marginTop: "20px" }}>
             <Typography>Columbus Day : 13th October 2025 (Monday)</Typography>
             <Typography>Halloween : 30th October 2025 (Wednesday)</Typography>
@@ -207,6 +199,7 @@ const MainBody = () => {
               padding: "20px",
             }}
           >
+            <Typography variant="h6" textAlign={"center"}>Pending Tasks</Typography>
             <ResponsiveContainer width={500} height={300}>
               <LineChart
                 data={data}
@@ -247,7 +240,7 @@ const MainBody = () => {
                   nameKey="name"
                   cx="50%"
                   cy="50%"
-                  outerRadius={100}
+                  outerRadius={90}
                   label
                 >
                   {pieData.map((entry, index) => (
@@ -304,8 +297,8 @@ const MainBody = () => {
           {/* Bar Chart */}
         </Box>
       </Box>
-    </Box>
+    </>
   );
 };
 
-export default MainBody;
+export default Dashboard;
