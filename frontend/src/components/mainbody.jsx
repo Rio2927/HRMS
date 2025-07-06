@@ -1,8 +1,6 @@
 import React from "react";
-import { Card, CardContent, Typography, Box } from "@mui/material";
+import { Typography, Box } from "@mui/material";
 import {
-  LineChart,
-  Line,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -10,19 +8,11 @@ import {
   Legend,
   ResponsiveContainer,
 } from "recharts";
-
-import { AreaChart, Area } from "recharts";
-
-import { Skeleton } from "@mui/material";
-import { CircularProgress } from "@mui/material";
-import { Stepper, Step, StepLabel } from "@mui/material";
-import { MobileStepper } from "@mui/material";
-import { Button } from "@mui/material";
-import { Slider } from "@mui/material";
-import { LinearProgress } from "@mui/material";
+import { LineChart, Line } from "recharts";
 import { PieChart, Pie, Cell } from "recharts";
+import { AreaChart, Area } from "recharts";
+import { CircularProgress } from "@mui/material";
 
-import { BarChart, Bar } from "recharts";
 
 const MainBody = () => {
   const data = [
@@ -41,18 +31,6 @@ const MainBody = () => {
     { name: "Marketing", value: 20 },
   ];
 
-  // const barData = [
-  //   { name: "John", leaves: 4 },
-  //   { name: "Alice", leaves: 2 },
-  //   { name: "David", leaves: 5 },
-  //   { name: "Rohit", leaves: 3 },
-  // ];
-
-  // const donutData = [
-  //   { name: "Male", value: 70 },
-  //   { name: "Female", value: 30 },
-  // ];
-
   const areaData = [
     { month: "Jan", Employees: 40 },
     { month: "Feb", Employees: 48 },
@@ -61,15 +39,6 @@ const MainBody = () => {
     { month: "May", Employees: 70 },
     { month: "Jun", Employees: 40 },
   ];
-
-  // const dataBarChart = [
-  //   { name: "Jan", value: 400 },
-  //   { name: "Feb", value: 300 },
-  //   { name: "Mar", value: 500 },
-  //   { name: "Apr", value: 200 },
-  // ];
-
-  // const steps = ["Login", "Shipping", "Payment"];
 
   const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042"];
 
