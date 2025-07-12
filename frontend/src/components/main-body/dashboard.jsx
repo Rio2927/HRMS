@@ -13,6 +13,8 @@ import { PieChart, Pie, Cell } from "recharts";
 import { AreaChart, Area } from "recharts";
 import { CircularProgress } from "@mui/material";
 
+import "../../App.css";
+
 const Dashboard = () => {
   const data = [
     { month: "Jan", employees: 45 },
@@ -50,7 +52,7 @@ const Dashboard = () => {
         sx={{
           display: "flex",
           justifyContent: "space-between",
-          padding: "20px 20px",
+          padding: "15px 10px",
         }}
       >
         {/* Allocation Box */}
@@ -62,18 +64,15 @@ const Dashboard = () => {
             background: "#121212",
           }}
         >
-          <Typography variant="h6" textAlign={"center"}>Allocation</Typography>
+          <Typography variant="h6" textAlign={"center"}>
+            Allocation
+          </Typography>
           <Box sx={{ marginTop: "20px" }}>
             <Typography>John Doe (M274)</Typography>
             <Typography>Email : john@xyz.com</Typography>
             <Typography>Designation : Software Engineer</Typography>
             <Typography>Reporting Manager : Andrew Richards</Typography>
           </Box>
-
-          {/* Type of Progress Bar */}
-          {/* <Skeleton variant="text" width={210} />
-          <Skeleton variant="rectangular" height={118} /> */}
-          {/* Type of Progress Bar */}
         </Box>
 
         {/* Leave Balance Box */}
@@ -122,31 +121,16 @@ const Dashboard = () => {
             background: "#121212",
           }}
         >
-          <Typography variant="h6" textAlign={"center"}>Upcoming Holidays</Typography>
+          <Typography variant="h6" textAlign={"center"}>
+            Upcoming Holidays
+          </Typography>
           <Box sx={{ marginTop: "20px" }}>
             <Typography>Columbus Day : 13th October 2025 (Monday)</Typography>
             <Typography>Halloween : 30th October 2025 (Wednesday)</Typography>
             <Typography>Christmas : 25th December 2025 (Friday)</Typography>
             <Typography>New Year 2026 : 1st January 2025 (Friday)</Typography>
           </Box>
-          {/* Type of Progress Bar */}
-          {/* <Stepper activeStep={1}>
-            {steps.map((label) => (
-              <Step key={label}>
-                <StepLabel>{label}</StepLabel>
-              </Step>
-            ))}
-          </Stepper> */}
-          {/* Type of Progress Bar */}
-          {/* Type of Progress Bar */}
-          {/* <MobileStepper
-            variant="dots"
-            steps={3}
-            position="static"
-            activeStep={1}
-            nextButton={<Button>Next</Button>}
-            backButton={<Button>Back</Button>}
-          /> */}
+
           {/* Type of Progress Bar */}
         </Box>
 
@@ -170,17 +154,10 @@ const Dashboard = () => {
           >
             <Typography variant="h2">5</Typography>
           </Box>
-          {/* Type of Progress Bar */}
-          {/* <Slider defaultValue={50} aria-label="Default" /> */}
-          {/* Type of Progress Bar */}
-          {/* Type of Progress Bar */}
-          {/* <LinearProgress />
-          <LinearProgress variant="determinate" value={70} /> */}
-          {/* Type of Progress Bar */}
         </Box>
       </Box>
 
-      <Box sx={{ padding: "0px 20px", display: "flex" }}>
+      <Box sx={{ padding: "0px 10px", display: "flex" }}>
         <Box
           sx={{
             // border: "2px solid red",                                                         // Iska border red tha
@@ -197,10 +174,13 @@ const Dashboard = () => {
               background: "#121212",
               borderRadius: "12px",
               padding: "20px",
+              width: "45%",
             }}
           >
-            <Typography variant="h6" textAlign={"center"}>Pending Tasks</Typography>
-            <ResponsiveContainer width={500} height={300}>
+            <Typography variant="h6" textAlign={"center"}>
+              Pending Tasks
+            </Typography>
+            <ResponsiveContainer width="100%" height={300}>                                                 
               <LineChart
                 data={data}
                 margin={{ top: 20, right: 30, left: 0, bottom: 0 }}
@@ -227,6 +207,7 @@ const Dashboard = () => {
               background: "#121212",
               borderRadius: "12px",
               padding: "20px",
+              width: "25%",
             }}
           >
             <Typography variant="h6" sx={{ mb: 2 }}>
@@ -263,6 +244,7 @@ const Dashboard = () => {
               background: "#121212",
               borderRadius: "12px",
               padding: "20px",
+              width: "25%",
             }}
           >
             <Typography variant="h6" sx={{ mb: 2 }}>
@@ -302,3 +284,317 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
+
+// Claude code
+
+// import React from "react";
+// import { Typography, Box } from "@mui/material";
+// import {
+//   XAxis,
+//   YAxis,
+//   CartesianGrid,
+//   Tooltip,
+//   Legend,
+//   ResponsiveContainer,
+// } from "recharts";
+// import { LineChart, Line } from "recharts";
+// import { PieChart, Pie, Cell } from "recharts";
+// import { AreaChart, Area } from "recharts";
+// import { CircularProgress } from "@mui/material";
+
+// const Dashboard = () => {
+//   const data = [
+//     { month: "Jan", employees: 45 },
+//     { month: "Feb", employees: 50 },
+//     { month: "Mar", employees: 53 },
+//     { month: "Apr", employees: 60 },
+//     { month: "May", employees: 62 },
+//     { month: "Jun", employees: 64 },
+//   ];
+
+//   const pieData = [
+//     { name: "Engineering", value: 40 },
+//     { name: "Sales", value: 25 },
+//     { name: "HR", value: 15 },
+//     { name: "Marketing", value: 20 },
+//   ];
+
+//   const areaData = [
+//     { month: "Jan", Employees: 40 },
+//     { month: "Feb", Employees: 48 },
+//     { month: "Mar", Employees: 50 },
+//     { month: "Apr", Employees: 60 },
+//     { month: "May", Employees: 70 },
+//     { month: "Jun", Employees: 40 },
+//   ];
+
+//   const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042"];
+
+//   return (
+//     <Box sx={{ minHeight: "100vh", backgroundColor: "#0a0a0a", color: "white" }}>
+//       {/* Container for 4 box (Upper) */}
+//       <Box
+//         sx={{
+//           display: "grid",
+//           gridTemplateColumns: {
+//             xs: "1fr",
+//             sm: "1fr 1fr",
+//             lg: "1fr 1fr 1fr 1fr"
+//           },
+//           gap: { xs: 2, sm: 3 },
+//           padding: { xs: "16px", sm: "20px" },
+//         }}
+//       >
+//         {/* Allocation Box */}
+//         <Box
+//           sx={{
+//             borderRadius: "12px",
+//             padding: { xs: "16px", sm: "20px" },
+//             background: "#121212",
+//             minHeight: "200px",
+//           }}
+//         >
+//           <Typography variant="h6" textAlign={"center"}>
+//             Allocation
+//           </Typography>
+//           <Box sx={{ marginTop: "20px" }}>
+//             <Typography sx={{ fontSize: { xs: "0.875rem", sm: "1rem" }, wordBreak: "break-word" }}>
+//               John Doe (M274)
+//             </Typography>
+//             <Typography sx={{ fontSize: { xs: "0.875rem", sm: "1rem" }, wordBreak: "break-word" }}>
+//               Email : john@xyz.com
+//             </Typography>
+//             <Typography sx={{ fontSize: { xs: "0.875rem", sm: "1rem" }, wordBreak: "break-word" }}>
+//               Designation : Software Engineer
+//             </Typography>
+//             <Typography sx={{ fontSize: { xs: "0.875rem", sm: "1rem" }, wordBreak: "break-word" }}>
+//               Reporting Manager : Andrew Richards
+//             </Typography>
+//           </Box>
+//         </Box>
+
+//         {/* Leave Balance Box */}
+//         <Box
+//           sx={{
+//             borderRadius: "12px",
+//             padding: { xs: "16px", sm: "20px" },
+//             background: "#121212",
+//             minHeight: "200px",
+//           }}
+//         >
+//           <Typography variant="h6">Leave Balance</Typography>
+
+//           {/* Type of Progress Bar */}
+//           <Box
+//             sx={{
+//               marginTop: "20px",
+//               display: "flex",
+//               justifyContent: "center",
+//               alignItems: "center",
+//               gap: "20px",
+//               flexDirection: { xs: "column", sm: "row" },
+//             }}
+//           >
+//             <Typography variant="h5">3/3</Typography>
+//             <CircularProgress
+//               variant="determinate"
+//               value={90}
+//               sx={{
+//                 color: "white",
+//               }}
+//               size={80}
+//             />
+//           </Box>
+//         </Box>
+
+//         {/* Upcoming Holidays Box */}
+//         <Box
+//           sx={{
+//             borderRadius: "12px",
+//             padding: { xs: "16px", sm: "20px" },
+//             background: "#121212",
+//             minHeight: "200px",
+//           }}
+//         >
+//           <Typography variant="h6" textAlign={"center"}>
+//             Upcoming Holidays
+//           </Typography>
+//           <Box sx={{ marginTop: "20px" }}>
+//             <Typography sx={{ fontSize: { xs: "0.875rem", sm: "1rem" }, wordBreak: "break-word", mb: 1 }}>
+//               Columbus Day : 13th October 2025 (Monday)
+//             </Typography>
+//             <Typography sx={{ fontSize: { xs: "0.875rem", sm: "1rem" }, wordBreak: "break-word", mb: 1 }}>
+//               Halloween : 30th October 2025 (Wednesday)
+//             </Typography>
+//             <Typography sx={{ fontSize: { xs: "0.875rem", sm: "1rem" }, wordBreak: "break-word", mb: 1 }}>
+//               Christmas : 25th December 2025 (Friday)
+//             </Typography>
+//             <Typography sx={{ fontSize: { xs: "0.875rem", sm: "1rem" }, wordBreak: "break-word" }}>
+//               New Year 2026 : 1st January 2025 (Friday)
+//             </Typography>
+//           </Box>
+//         </Box>
+
+//         {/* Pending Tasks Box */}
+//         <Box
+//           sx={{
+//             borderRadius: "12px",
+//             padding: { xs: "16px", sm: "20px" },
+//             background: "#121212",
+//             minHeight: "200px",
+//           }}
+//         >
+//           <Typography variant="h6">Pending Tasks</Typography>
+//           <Box
+//             sx={{
+//               display: "flex",
+//               justifyContent: "center",
+//               alignItems: "center",
+//               marginTop: "20px",
+//               height: "100px",
+//             }}
+//           >
+//             <Typography variant="h2">5</Typography>
+//           </Box>
+//         </Box>
+//       </Box>
+
+//       {/* Charts Container */}
+//       <Box
+//         sx={{
+//           padding: { xs: "16px", sm: "20px" },
+//           paddingTop: 0,
+//         }}
+//       >
+//         <Box
+//           sx={{
+//             display: "grid",
+//             gridTemplateColumns: {
+//               xs: "1fr",
+//               md: "1fr 1fr",
+//               lg: "1fr 1fr 1fr"
+//             },
+//             gap: { xs: 2, sm: 3 },
+//             width: "100%",
+//           }}
+//         >
+//           {/* LineGraph */}
+//           <Box
+//             sx={{
+//               background: "#121212",
+//               borderRadius: "12px",
+//               padding: { xs: "16px", sm: "20px" },
+//               minHeight: "350px",
+//             }}
+//           >
+//             <Typography variant="h6" textAlign={"center"} sx={{ mb: 2 }}>
+//               Employee Growth
+//             </Typography>
+//             <Box sx={{ width: "100%", height: "300px" }}>
+//               <ResponsiveContainer width="100%" height="100%">
+//                 <LineChart
+//                   data={data}
+//                   margin={{ top: 20, right: 30, left: 0, bottom: 0 }}
+//                 >
+//                   <CartesianGrid strokeDasharray="3 3" />
+//                   <XAxis dataKey="month" />
+//                   <YAxis />
+//                   <Tooltip />
+//                   <Line
+//                     type="monotone"
+//                     dataKey="employees"
+//                     stroke="#8884d8"
+//                     strokeWidth={2}
+//                     activeDot={{ r: 6 }}
+//                   />
+//                 </LineChart>
+//               </ResponsiveContainer>
+//             </Box>
+//           </Box>
+
+//           {/* Pie Chart */}
+//           <Box
+//             sx={{
+//               background: "#121212",
+//               borderRadius: "12px",
+//               padding: { xs: "16px", sm: "20px" },
+//               minHeight: "350px",
+//             }}
+//           >
+//             <Typography variant="h6" sx={{ mb: 2, textAlign: "center" }}>
+//               Department-wise Distribution
+//             </Typography>
+//             <Box sx={{ width: "100%", height: "300px" }}>
+//               <ResponsiveContainer width="100%" height="100%">
+//                 <PieChart>
+//                   <Pie
+//                     data={pieData}
+//                     dataKey="value"
+//                     nameKey="name"
+//                     cx="50%"
+//                     cy="50%"
+//                     outerRadius={80}
+//                     label
+//                   >
+//                     {pieData.map((entry, index) => (
+//                       <Cell
+//                         key={`cell-${index}`}
+//                         fill={COLORS[index % COLORS.length]}
+//                       />
+//                     ))}
+//                   </Pie>
+//                   <Tooltip />
+//                   <Legend />
+//                 </PieChart>
+//               </ResponsiveContainer>
+//             </Box>
+//           </Box>
+
+//           {/* Area Chart */}
+//           <Box
+//             sx={{
+//               background: "#121212",
+//               borderRadius: "12px",
+//               padding: { xs: "16px", sm: "20px" },
+//               minHeight: "350px",
+//               gridColumn: { xs: "1", md: "1 / -1", lg: "auto" },
+//             }}
+//           >
+//             <Typography variant="h6" sx={{ mb: 2, textAlign: "center" }}>
+//               Active Employees Over Time
+//             </Typography>
+//             <Box sx={{ width: "100%", height: "300px" }}>
+//               <ResponsiveContainer width="100%" height="100%">
+//                 <AreaChart
+//                   data={areaData}
+//                   margin={{ top: 20, right: 30, left: 0, bottom: 0 }}
+//                 >
+//                   <defs>
+//                     <linearGradient id="colorEmp" x1="0" y1="0" x2="0" y2="1">
+//                       <stop offset="5%" stopColor="#8884d8" stopOpacity={0.8} />
+//                       <stop offset="95%" stopColor="#8884d8" stopOpacity={0} />
+//                     </linearGradient>
+//                   </defs>
+//                   <CartesianGrid strokeDasharray="3 3" />
+//                   <XAxis dataKey="month" />
+//                   <YAxis />
+//                   <Tooltip />
+//                   <Legend />
+//                   <Area
+//                     type="monotone"
+//                     dataKey="Employees"
+//                     stroke="#8884d8"
+//                     fillOpacity={1}
+//                     fill="url(#colorEmp)"
+//                   />
+//                 </AreaChart>
+//               </ResponsiveContainer>
+//             </Box>
+//           </Box>
+//         </Box>
+//       </Box>
+//     </Box>
+//   );
+// };
+
+// export default Dashboard;
