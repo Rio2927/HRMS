@@ -36,6 +36,7 @@ function Navbar() {
       .then((res) => {
         console.log("Fetched Actors:", res.data);
         setActors(res.data);
+        console.log(actors)
       })
       .catch((err) => console.error(err));
   }, []);

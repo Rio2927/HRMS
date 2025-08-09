@@ -13,9 +13,121 @@ import { PieChart, Pie, Cell } from "recharts";
 import { AreaChart, Area } from "recharts";
 import { CircularProgress } from "@mui/material";
 
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+} from "@mui/material";
+
 import "../../App.css";
 
 const Dashboard = () => {
+  const rows = [
+    {
+      name: "John",
+      age: 28,
+      role: "Developer",
+      email: "john@example.com",
+      phone: "9876543210",
+      department: "Engineering",
+      salary: "$80,000",
+    },
+    {
+      name: "Jane",
+      age: 32,
+      role: "Designer",
+      email: "jane@example.com",
+      phone: "9876543211",
+      department: "Design",
+      salary: "$75,000",
+    },
+    {
+      name: "Mike",
+      age: 25,
+      role: "Tester",
+      email: "mike@example.com",
+      phone: "9876543212",
+      department: "QA",
+      salary: "$70,000",
+    },
+    {
+      name: "John",
+      age: 28,
+      role: "Developer",
+      email: "john.doe@example.com",
+      phone: "9876543213",
+      department: "Engineering",
+      salary: "$80,000",
+    },
+    {
+      name: "Jane",
+      age: 32,
+      role: "Designer",
+      email: "jane.doe@example.com",
+      phone: "9876543214",
+      department: "Design",
+      salary: "$75,000",
+    },
+    {
+      name: "Mike",
+      age: 25,
+      role: "Tester",
+      email: "mike.smith@example.com",
+      phone: "9876543215",
+      department: "QA",
+      salary: "$70,000",
+    },
+    {
+      name: "John",
+      age: 28,
+      role: "Developer",
+      email: "john@example.com",
+      phone: "9876543210",
+      department: "Engineering",
+      salary: "$80,000",
+    },
+    {
+      name: "John",
+      age: 28,
+      role: "Developer",
+      email: "john@example.com",
+      phone: "9876543210",
+      department: "Engineering",
+      salary: "$80,000",
+    },
+    {
+      name: "John",
+      age: 28,
+      role: "Developer",
+      email: "john@example.com",
+      phone: "9876543210",
+      department: "Engineering",
+      salary: "$80,000",
+    },
+    {
+      name: "John",
+      age: 28,
+      role: "Developer",
+      email: "john@example.com",
+      phone: "9876543210",
+      department: "Engineering",
+      salary: "$80,000",
+    },
+    {
+      name: "John",
+      age: 28,
+      role: "Developer",
+      email: "john@example.com",
+      phone: "9876543210",
+      department: "Engineering",
+      salary: "$80,000",
+    },
+  ];
+
   const data = [
     { month: "Jan", employees: 45 },
     { month: "Feb", employees: 50 },
@@ -84,7 +196,7 @@ const Dashboard = () => {
             background: "#121212",
           }}
         >
-          <Typography variant="h6">Leave Balance</Typography>
+          <Typography variant="h6" textAlign={"center"}>Leave Balance</Typography>
 
           {/* Type of Progress Bar */}
           <Box
@@ -157,7 +269,7 @@ const Dashboard = () => {
         </Box>
       </Box>
 
-      <Box sx={{ padding: "0px 10px", display: "flex" }}>
+      <Box sx={{ padding: "10px 10px", display: "flex" }}>
         <Box
           sx={{
             // border: "2px solid red",                                                         // Iska border red tha
@@ -180,7 +292,7 @@ const Dashboard = () => {
             <Typography variant="h6" textAlign={"center"}>
               Pending Tasks
             </Typography>
-            <ResponsiveContainer width="100%" height={300}>                                                 
+            <ResponsiveContainer width="100%" height={300}>
               <LineChart
                 data={data}
                 margin={{ top: 20, right: 30, left: 0, bottom: 0 }}
@@ -278,6 +390,67 @@ const Dashboard = () => {
           </Box>
           {/* Bar Chart */}
         </Box>
+      </Box>
+
+      {/* Table */}
+
+      <Box
+        sx={{
+          // height: "100%",
+          // maxWidth: "calc(100vw - 239.2px)",
+          // maxWidth: "calc(100vw - 260px)",
+          width: "calc(100vw - 260px)",
+          padding: "15px 10px",
+        }}
+      >
+        <TableContainer
+          component={Paper}
+          sx={{
+            height: "600px",
+            // maxHeight: 400,
+            // overflowY: "auto",
+            // overflowX: "auto",
+            maxWidth: "100%",
+            borderRadius: "12px"
+          }}
+        >
+          <Table aria-label="salary table">
+            <TableHead>
+              <TableRow>
+                <TableCell>Name</TableCell>
+                <TableCell align="right">Age</TableCell>
+                <TableCell align="right">Role</TableCell>
+                <TableCell align="right">Email</TableCell>
+                {/* <TableCell align="right">Phone</TableCell>
+                    <TableCell align="right">Department</TableCell>
+                    <TableCell align="right">Salary</TableCell> */}
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {rows.map((row, idx) => (
+                <TableRow key={idx}>
+                  <TableCell>{row.name}</TableCell>
+                  <TableCell align="right">{row.age}</TableCell>
+                  <TableCell align="right">{row.role}</TableCell>
+                  <TableCell align="right">{row.email}</TableCell>
+                  {/* <TableCell align="right">{row.phone}</TableCell>
+                      <TableCell align="right">{row.department}</TableCell>
+                      <TableCell align="right">{row.salary}</TableCell> */}
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
+
+        {/* <Box
+          sx={{
+            marginTop: "20px",
+            background: "#121212",
+            padding: "20px",
+            borderRadius: "12px",
+          }}
+        >
+        </Box> */}
       </Box>
     </>
   );

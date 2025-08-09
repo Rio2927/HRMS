@@ -112,6 +112,15 @@ const Salary = () => {
       department: "Engineering",
       salary: "$80,000",
     },
+    {
+      name: "John",
+      age: 28,
+      role: "Developer",
+      email: "john@example.com",
+      phone: "9876543210",
+      department: "Engineering",
+      salary: "$80,000",
+    },
   ];
 
   const histogramData = [
@@ -189,25 +198,29 @@ const Salary = () => {
         </Table>
       </TableContainer>
 
-
-      <Box sx={{marginTop : "20px",background: "#121212",padding: "20px",borderRadius: "12px"}}>
-      <ResponsiveContainer width="100%" height={300}>
-        <BarChart data={histogramData}>
-          <CartesianGrid strokeDasharray="3 3" />
-          <XAxis
-            dataKey="range"
-            label={{ value: "Range", position: "insideBottom", offset: -5 }}
-          />
-          <YAxis
-            label={{ value: "Frequency", angle: -90, position: "insideLeft" }}
-          />
-          <Tooltip />
-          <Bar dataKey="count" fill="#8884d8" />
-        </BarChart>
-      </ResponsiveContainer>
+      <Box
+        sx={{
+          marginTop: "20px",
+          background: "#121212",
+          padding: "20px",
+          borderRadius: "12px",
+        }}
+      >
+        <ResponsiveContainer width="100%" height={300}>
+          <BarChart data={histogramData}>
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis
+              dataKey="range"
+              label={{ value: "Range", position: "insideBottom", offset: -5 }}
+            />
+            <YAxis
+              label={{ value: "Frequency", angle: -90, position: "insideLeft" }}
+            />
+            <Tooltip />
+            <Bar dataKey="count" fill="#8884d8" />
+          </BarChart>
+        </ResponsiveContainer>
       </Box>
-
-
     </Box>
   );
 };
