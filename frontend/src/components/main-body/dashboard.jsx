@@ -24,8 +24,17 @@ import {
 } from "@mui/material";
 
 import "../../App.css";
+// import WidthBelow1024px from "../responsiveCheck";
+import useWidthBelow1024 from "../responsiveCheck";
+
+// Note
+// upar waale 4 boxes ko 45% width dedo in case of tablet
+// flex-wrap dedo inke parent ko
 
 const Dashboard = () => {
+  const isBelow1024 = useWidthBelow1024(); // hook runs here
+  console.log("hook output:", isBelow1024);
+
   const rows = [
     {
       name: "John",
@@ -165,6 +174,8 @@ const Dashboard = () => {
           display: "flex",
           justifyContent: "space-between",
           padding: "15px 10px",
+          flexWrap: "wrap",
+          gap: isBelow1024 ? "25px" : "0px",
         }}
       >
         {/* Allocation Box */}
@@ -174,6 +185,9 @@ const Dashboard = () => {
             borderRadius: "12px",
             padding: "20px",
             background: "#121212",
+            // maxWidth: "30%",
+            maxWidth: isBelow1024 ? undefined : "30%",
+            width: isBelow1024 ? "45%" : undefined,
           }}
         >
           <Typography variant="h6" textAlign={"center"}>
@@ -194,9 +208,14 @@ const Dashboard = () => {
             borderRadius: "12px",
             padding: "20px",
             background: "#121212",
+            // maxWidth: "15%",
+            maxWidth: isBelow1024 ? undefined : "15%",
+            width: isBelow1024 ? "45%" : undefined,
           }}
         >
-          <Typography variant="h6" textAlign={"center"}>Leave Balance</Typography>
+          <Typography variant="h6" textAlign={"center"}>
+            Leave Balance
+          </Typography>
 
           {/* Type of Progress Bar */}
           <Box
@@ -231,6 +250,9 @@ const Dashboard = () => {
             borderRadius: "12px",
             padding: "20px",
             background: "#121212",
+            // maxWidth: "30%",
+            maxWidth: isBelow1024 ? undefined : "30%",
+            width: isBelow1024 ? "45%" : undefined,
           }}
         >
           <Typography variant="h6" textAlign={"center"}>
@@ -253,6 +275,9 @@ const Dashboard = () => {
             borderRadius: "12px",
             padding: "20px",
             background: "#121212",
+            // maxWidth: "30%",
+            maxWidth: isBelow1024 ? undefined : "30%",
+            width: isBelow1024 ? "45%" : undefined,
           }}
         >
           <Typography variant="h6">Pending Tasks</Typography>
@@ -278,6 +303,8 @@ const Dashboard = () => {
             width: "100%",
             display: "flex",
             justifyContent: "space-between",
+            flexWrap: "wrap",
+            gap: isBelow1024 ? "20px" : "0px",
           }}
         >
           {/* LineGraph */}
@@ -286,7 +313,7 @@ const Dashboard = () => {
               background: "#121212",
               borderRadius: "12px",
               padding: "20px",
-              width: "45%",
+              width: isBelow1024 ? "100%" : "45%",
             }}
           >
             <Typography variant="h6" textAlign={"center"}>
@@ -319,7 +346,7 @@ const Dashboard = () => {
               background: "#121212",
               borderRadius: "12px",
               padding: "20px",
-              width: "25%",
+              width: isBelow1024 ? "100%" : "25%",
             }}
           >
             <Typography variant="h6" sx={{ mb: 2 }}>
@@ -356,7 +383,7 @@ const Dashboard = () => {
               background: "#121212",
               borderRadius: "12px",
               padding: "20px",
-              width: "25%",
+              width: isBelow1024 ? "100%" : "25%",
             }}
           >
             <Typography variant="h6" sx={{ mb: 2 }}>
@@ -411,7 +438,7 @@ const Dashboard = () => {
             // overflowY: "auto",
             // overflowX: "auto",
             maxWidth: "100%",
-            borderRadius: "12px"
+            borderRadius: "12px",
           }}
         >
           <Table aria-label="salary table">

@@ -7,6 +7,8 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Dashboard from "./components/main-body/dashboard";
 import Salary from "./components/main-body/salary";
 import Leaves from "./components/main-body/leaves"
+import Attendance from "./components/main-body/attendance"
+import Payslip from "./components/main-body/payslip"
 
 function App() {
   return (
@@ -29,7 +31,8 @@ function App() {
             <Route path="/" element={<Dashboard />} />
             <Route path="/salary" element={<Salary />} />
             <Route path="/leaves" element={<Leaves />} />
-            {/* <Route path="/holidays" element={<Holidays />} /> */}
+            <Route path="/attendance" element={<Attendance />} />
+            <Route path="/payslip" element={<Payslip />} />
           </Routes>
         </Box>
 
