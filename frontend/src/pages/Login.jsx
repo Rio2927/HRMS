@@ -1,14 +1,17 @@
-import "./App.css";
-import { Box } from "@mui/material";
-import { useState } from "react";
-// import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import {
+  Box,
+  Container,
+  Paper,
+  Typography,
+  TextField,
+  Button,
+} from "@mui/material";
+
 
 function App() {
-  const [formData, setFormData] = useState(null);
-
-  const handleSubmit = () => {
+  const handleSubmit = (e) => {
+    e.preventDefault();
     console.log("Working");
-    setFormData("Test Delete line 11")
   };
 
   const handleChange = () => {
@@ -16,8 +19,28 @@ function App() {
   };
 
   return (
-    <Container maxWidth="sm">
-      <Paper elevation={3} sx={{ padding: 4, marginTop: 8 }}>
+    <Container
+      maxWidth="sm"
+      sx={{
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        height: "100vh",
+        "&.MuiContainer-root": {
+          minWidth: "0 !important", // force override
+        },
+      }}
+    >
+      <Paper
+        elevation={3}
+        sx={{
+          padding: 4,
+          // marginTop: 8,
+          backgroundColor: "#121212",
+          color: "white",
+          borderRadius: "12px"
+        }}
+      >
         <Typography variant="h5" gutterBottom align="center">
           Login
         </Typography>
@@ -30,9 +53,27 @@ function App() {
             type="email"
             variant="outlined"
             margin="normal"
-            value={formData.email}
             onChange={handleChange}
             required
+            InputLabelProps={{
+              style: { color: "#ccc" },
+            }}
+            InputProps={{
+              style: { color: "white", borderColor: "white" },
+            }}
+            sx={{
+              "& .MuiOutlinedInput-root": {
+                "& fieldset": {
+                  borderColor: "white", // default border color
+                },
+                "&:hover fieldset": {
+                  borderColor: "#90caf9", // border on hover
+                },
+                "&.Mui-focused fieldset": {
+                  borderColor: "#1976d2", // border when focused
+                },
+              },
+            }}
           />
           <TextField
             fullWidth
@@ -41,9 +82,27 @@ function App() {
             type="password"
             variant="outlined"
             margin="normal"
-            value={formData.password}
             onChange={handleChange}
             required
+            InputLabelProps={{
+              style: { color: "#ccc" },
+            }}
+            InputProps={{
+              style: { color: "white", borderColor: "white" },
+            }}
+            sx={{
+              "& .MuiOutlinedInput-root": {
+                "& fieldset": {
+                  borderColor: "white", // default border color
+                },
+                "&:hover fieldset": {
+                  borderColor: "#90caf9", // border on hover
+                },
+                "&.Mui-focused fieldset": {
+                  borderColor: "#1976d2", // border when focused
+                },
+              },
+            }}
           />
           <Button
             type="submit"
