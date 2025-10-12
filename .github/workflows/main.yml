@@ -1,0 +1,30 @@
+name: Deploy to Physical Server
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repo
+      uses: actions/checkout@v4
+
+    - name: Deploy over SSH
+      uses: appleboy/ssh-action@v1.0.3
+      with:
+        host: ${{ secrets.SERVER_IP }}
+        username: ${{ secrets.SERVER_USER }}
+        key: ${{ secrets.SERVER_SSH_KEY }}
+        script: |
+          cd HRMS
+          git pull origin main
+          cd frontend
+          # source venv/bin/activate
+          # pip install -r requirements.txt
+          npm install
+          npm run dev
+          # sudo systemctl restart myapp.service
+          # sudo systemctl reload nginx
