@@ -57,7 +57,7 @@ function Navbar() {
                 </IconButton> */}
 
         <Typography variant="h6" noWrap sx={{ flexGrow: 1 }}>
-          HRMS Portals asjhdbasjhd                                                                 {/* Idhar kiya hai pipeline test change */}
+          HRMS Portal                                                                 {/* Idhar kiya hai pipeline test change */}
         </Typography>
 
         <Box>
