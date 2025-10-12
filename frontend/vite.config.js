@@ -19,5 +19,9 @@ export default defineConfig({
       '@fullcalendar/react',
       '@fullcalendar/core'
     ]
-  }
+  },
+    server: {
+    host: '0.0.0.0',
+    port: 3000,
+  },
 });
