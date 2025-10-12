@@ -22,9 +22,6 @@ jobs:
           cd HRMS
           git pull origin main
           cd frontend
-          # source venv/bin/activate
-          # pip install -r requirements.txt
           npm install
-          npm run dev
-          # sudo systemctl restart myapp.service
-          # sudo systemctl reload nginx
+          npm run build
+          pm2 restart hrms-frontend || pm2 start npx --name hrms-frontend -- serve -s dist -l 3000
