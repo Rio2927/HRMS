@@ -6,7 +6,7 @@ from models.employee import Employee
 from models.department import Department
 from models.hr_manager import HRManager
 from models.payroll import Payroll
-
+from models.db_models import EmployeeModel
 
 app = Flask(__name__)
 
@@ -48,17 +48,47 @@ def get_employees():
 @app.route('/login', methods=['POST'])
 def login():
     data = request.get_json()
-
     if not data:
         return jsonify({'error': 'Invalid JSON'}), 400
 
     name = data.get('name')
     email = data.get('email')
 
-    print("Name = ",name)
-    print("Email = ",email)
+    if not name or not email:
+        return jsonify({'error': 'Name and email required'}), 400
 
-    return jsonify({"msg": "Received Info","name" : name,"email" : email}), 401
+    try:
+        with get_conn() as conn, conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
+            # ✅ Check if employee already exists
+            cur.execute('SELECT * FROM public."HRMS" WHERE email = %s', (email,))
+            employee = cur.fetchone()
+
+            if employee:
+                return jsonify({
+                    'msg': 'Employee already exists',
+                    'employee_id': employee.get('id'),
+                    'name': employee.get('name'),
+                    'email': employee.get('email')
+                }), 200
+            else:
+                # ✅ Insert new employee if not exists
+                cur.execute(
+                    'INSERT INTO public."HRMS" (name, email) VALUES (%s, %s) RETURNING id',
+                    (name, email)
+                )
+                new_id = cur.fetchone()['id']
+                conn.commit()
+
+                return jsonify({
+                    'msg': 'New employee created',
+                    'employee_id': new_id,
+                    'name': name,
+                    'email': email
+                }), 201
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
 
 
 
