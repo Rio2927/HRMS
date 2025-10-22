@@ -31,10 +31,12 @@ def get_employees():
         with get_conn() as conn, conn.cursor(cursor_factory=psycopg2.extras.DictCursor) as cur:
             # If your table is public.employees:
             cur.execute('SELECT * FROM public."HRMS"')
-            rows = cur.fetchall()
-            print("Rows = ",rows)
-            data = [dict(r) for r in rows]
-            print("Data => ",data)
+            rows = cur.fetchall()                                                   # List of DictRow objects
+            print("Rows = ",rows)                                                   # [{'name': 'Alice', 'department': 'HR'},{'name': 'Bob', 'department': 'IT'}] aisa kuch output hoga
+                                                                                    # Har row ko dict (JSON) me convert kar dega
+                                                                                    # Dikhne me pure Python dictionary (JSON) = DictRow but not internally
+            data = [dict(r) for r in rows]                                          # Har row ko JSON (dict in python) me convert karti hai
+            # print("Data => ",data)                                                                          
         return jsonify(data)
     except Exception as e:
         # Return the error so you can see exact cause
@@ -62,7 +64,7 @@ def login():
             # ✅ Check if employee already exists
             cur.execute('SELECT * FROM public."HRMS" WHERE email = %s', (email,))
             employee = cur.fetchone()
-
+            print("Login API called")
             if employee:
                 return jsonify({
                     'msg': 'Employee already exists',

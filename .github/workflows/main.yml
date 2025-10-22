@@ -20,9 +20,22 @@ jobs:
         key: ${{ secrets.SERVER_SSH_KEY }}
         passphrase: ${{ secrets.SERVER_SSH_PASSPHRASE }}
         script: |
+          echo "📦 Pulling latest code..."
           cd HRMS
           git pull origin main
+
+          echo "🚀 Deploying Frontend..."
           cd frontend
           npm install
           npm run build
           pm2 restart hrms-frontend || pm2 start npx --name hrms-frontend -- serve -s dist -l 3000
+          
+          echo "💾 Deploying Backend..."
+          cd ../backend
+          
+          # If Python backend (Flask/FastAPI/Django)
+          if [ -f "requirements.txt" ]; then
+            source venv/bin/activate 2>/dev/null || python3 -m venv venv && source venv/bin/activate
+            pip install -r requirements.txt
+            pm2 restart hrms-backend || pm2 start venv/bin/python --name hrms-backend app.py
+          fi
