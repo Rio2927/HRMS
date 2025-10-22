@@ -1,41 +1,59 @@
-name: Deploy to Physical Server
+name: 🚀 Deploy Full Stack App
 
 on:
   push:
-    branches: [ "main" ]
+    branches:
+      - main
 
 jobs:
-  deploy:
+  # --------------------------
+  # 1️⃣ FRONTEND DEPLOY JOB
+  # --------------------------
+  frontend-deploy:
+    name: Deploy Frontend
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout repo
-      uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-    - name: Deploy over SSH
-      uses: appleboy/ssh-action@v1.0.3
-      with:
-        host: ${{ secrets.SERVER_IP }}
-        username: ${{ secrets.SERVER_USER }}
-        key: ${{ secrets.SERVER_SSH_KEY }}
-        passphrase: ${{ secrets.SERVER_SSH_PASSPHRASE }}
-        script: |
-          echo "📦 Pulling latest code..."
-          cd HRMS
-          git pull origin main
+      - name: Deploy Frontend via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SERVER_IP }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            echo "🎨 Pulling latest frontend code..."
+            cd /home/ubuntu/HRMS/frontend
+            git pull origin main
+            npm install
+            npm run build
+            echo "✅ Frontend deployed successfully."
 
-          echo "🚀 Deploying Frontend..."
-          cd frontend
-          npm install
-          npm run build
-          pm2 restart hrms-frontend || pm2 start npx --name hrms-frontend -- serve -s dist -l 3000
-          
-          echo "💾 Deploying Backend..."
-          cd ../backend
-          
-          # If Python backend (Flask/FastAPI/Django)
-          if [ -f "requirements.txt" ]; then
-            source venv/bin/activate 2>/dev/null || python3 -m venv venv && source venv/bin/activate
+  # --------------------------
+  # 2️⃣ BACKEND DEPLOY JOB
+  # --------------------------
+  backend-deploy:
+    name: Deploy Backend
+    runs-on: ubuntu-latest
+    needs: frontend-deploy   # ✅ This makes backend run only AFTER frontend succeeds
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Deploy Backend via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SERVER_IP }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            echo "🧠 Pulling latest backend code..."
+            cd /home/ubuntu/HRMS/backend
+            git pull origin main
             pip install -r requirements.txt
-            pm2 restart hrms-backend || pm2 start venv/bin/python --name hrms-backend app.py
-          fi
+            echo "🔁 Restarting backend service..."
+            pm2 restart hrms-backend || pm2 start app.py --name hrms-backend
+            echo "✅ Backend deployed successfully."
