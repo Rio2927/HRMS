@@ -1,4 +1,4 @@
-#Test 7
+#Test 8
 name: 🚀 Deploy HRMS (Frontend + Flask Backend)
 
 on:
@@ -26,8 +26,9 @@ jobs:
           key: ${{ secrets.SERVER_SSH_KEY }}
           script: |
             echo "🎨 Pulling latest frontend code..."
-            cd /home/ubuntu/HRMS/frontend
+            cd HRMS
             git pull origin main
+            cd /frontend
             npm install
             npm run build
             echo "✅ Frontend build complete."
@@ -52,9 +53,9 @@ jobs:
           key: ${{ secrets.SERVER_SSH_KEY }}
           script: |
             echo "🧠 Pulling latest backend code..."
-            cd /home/ubuntu/HRMS/backend
+            cd HRMS
             git pull origin main
-
+            cd /backend
             echo "🐍 Activating virtual environment..."
             if [ ! -d "venv" ]; then
               python3 -m venv venv
