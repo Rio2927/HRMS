@@ -1,3 +1,5 @@
+import { useState } from "react";
+
 import {
   Box,
   Container,
@@ -7,16 +9,51 @@ import {
   Button,
 } from "@mui/material";
 
-
 function App() {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
   const handleSubmit = (e) => {
     e.preventDefault();
     console.log("Working");
   };
 
-  const handleChange = () => {
-    console.log("Working");
+  const handleEmailChange = (e) => {
+    setEmail(e.target.value);
   };
+  const handlePasswordChange = (e) => setPassword(e.target.value);
+
+  const handleLogin = () => {
+    // console.log()
+    // console.log("Email : ", email);
+    // console.log("Password : ", password);
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      console.log("Email is incorrect");
+      return;
+    } else {
+      console.log("Email is correct");
+      fetch(`${import.meta.env.VITE_BASE_URL}/login`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: "Rohit",
+          email: "abc123",
+        }),
+      })
+        .then((res) => res.json())
+        .then((data) => console.log("Response:", data))
+        .catch((err) => console.error("Error:", err));
+    }
+  };
+
+  // useEffect(() => {
+  //   console.log("Email : ", email);
+  //   console.log("Password : ", password);
+  // }, [email,password]);
 
   return (
     <Container
@@ -38,7 +75,7 @@ function App() {
           // marginTop: 8,
           backgroundColor: "#121212",
           color: "white",
-          borderRadius: "12px"
+          borderRadius: "12px",
         }}
       >
         <Typography variant="h5" gutterBottom align="center">
@@ -51,9 +88,10 @@ function App() {
             label="Email"
             name="email"
             type="email"
+            value={email}
             variant="outlined"
             margin="normal"
-            onChange={handleChange}
+            onChange={handleEmailChange}
             required
             InputLabelProps={{
               style: { color: "#ccc" },
@@ -80,9 +118,10 @@ function App() {
             label="Password"
             name="password"
             type="password"
+            value={password}
             variant="outlined"
             margin="normal"
-            onChange={handleChange}
+            onChange={handlePasswordChange}
             required
             InputLabelProps={{
               style: { color: "#ccc" },
@@ -110,6 +149,7 @@ function App() {
             color="primary"
             fullWidth
             sx={{ mt: 3 }}
+            onClick={handleLogin}
           >
             Login
           </Button>

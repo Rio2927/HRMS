@@ -8,14 +8,22 @@ from models.hr_manager import HRManager
 from models.payroll import Payroll
 from models.db_models import EmployeeModel
 
+from flask_cors import CORS
+from werkzeug.security import generate_password_hash, check_password_hash
+
+
+
 app = Flask(__name__)
+
+# Enable CORS for all routes and origins
+CORS(app)
 
 def get_conn():
     # Force IPv4 to avoid ::1/IPv6 pg_hba mismatch issues
     return psycopg2.connect(
         host="127.0.0.1",
         port=5432,
-        dbname="postgres",      # or "hrms" if you created it
+        dbname="HRMS",      # or "hrms" if you created it
         user="postgres",        # lowercase user we created
         password="Rohit@2704",
     )
@@ -44,8 +52,38 @@ def get_employees():
 
 
 
+@app.route('/create',methods=['POST'])
+def create():
+    data = request.get_json()
+    
+    first_name = data.get('first_name')
+    last_name = data.get('last_name')
+    password = data.get('password')
 
+    try:
+        password_hash = generate_password_hash(password)
+        print("First Name : ",first_name)
+        print("Last Name  : ",last_name)
+        print("Hashed PW  : ",password_hash)
 
+        # ✅ Save to PostgreSQL
+        with get_conn() as conn, conn.cursor() as cur:
+            cur.execute('''
+                INSERT INTO public.employees (first_name,last_name, password)
+                VALUES (%s, %s,%s)
+                RETURNING employee_id
+            ''', (first_name,last_name,password_hash))
+
+            new_id = cur.fetchone()[0]
+            conn.commit()
+
+    except Exception as e:
+        import traceback
+        print("Error occurred:", e)
+        traceback.print_exc()   # ✅ Prints full stack trace
+        return jsonify({"error": str(e)}), 500
+
+    return jsonify({"success" : "true"})
 
 @app.route('/login', methods=['POST'])
 def login():
@@ -54,15 +92,18 @@ def login():
         return jsonify({'error': 'Invalid JSON'}), 400
 
     name = data.get('name')
-    email = data.get('email')
+    password = data.get('password')
 
-    if not name or not email:
+    # print("Name : ",name)
+    # print("Email : ",email)
+
+    if not name or not password:
         return jsonify({'error': 'Name and email required'}), 400
 
     try:
         with get_conn() as conn, conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
             # ✅ Check if employee already exists
-            cur.execute('SELECT * FROM public."HRMS" WHERE email = %s', (email,))
+            cur.execute('SELECT * FROM public."HRMS" WHERE password = %s', (password,))
             employee = cur.fetchone()
             print("Login API called")
             if employee:
@@ -76,7 +117,7 @@ def login():
                 # ✅ Insert new employee if not exists
                 cur.execute(
                     'INSERT INTO public."HRMS" (name, email) VALUES (%s, %s) RETURNING id',
-                    (name, email)
+                    (name, password)
                 )
                 new_id = cur.fetchone()['id']
                 conn.commit()
@@ -85,7 +126,7 @@ def login():
                     'msg': 'New employee created',
                     'employee_id': new_id,
                     'name': name,
-                    'email': email
+                    'password': password
                 }), 201
 
     except Exception as e:
