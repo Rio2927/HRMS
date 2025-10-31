@@ -1,4 +1,6 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+
 import {
   AppBar,
   Box,
@@ -10,11 +12,12 @@ import {
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 import { Menu, MenuItem } from "@mui/material";
-import axios from "axios"; // ✅ Make sure axios is installed
+// import axios from "axios"; // ✅ Make sure axios is installed
 
 function Navbar() {
-  const [actors, setActors] = useState([]);
-  const hasFetched = useRef(false);
+  // const [actors, setActors] = useState([]);
+  // const hasFetched = useRef(false);
+  const navigate = useNavigate();
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
 
@@ -22,8 +25,28 @@ function Navbar() {
     setAnchorEl(event.currentTarget);
   };
 
-  const handleClose = () => {
+  const handleClose = (action) => {
     setAnchorEl(null);
+    console.log(action); // ✅ "logout"
+
+    switch (action) {
+      case "profile":
+        console.log("Profile clicked");
+        break;
+
+      case "settings":
+        console.log("Settings clicked");
+        break;
+
+      case "logout":
+        localStorage.clear();
+        navigate("/login", { replace: true });
+        break;
+
+      default:
+        console.log("Unknown action:", action);
+        break;
+    }
   };
 
   // useEffect(() => {
@@ -48,7 +71,7 @@ function Navbar() {
         zIndex: (theme) => theme.zIndex.drawer + 1,
         backgroundColor: "#121212",
         boxShadow: "none",
-        width: "100%"
+        width: "100%",
       }}
     >
       <Toolbar>
@@ -57,7 +80,7 @@ function Navbar() {
                 </IconButton> */}
 
         <Typography variant="h6" noWrap sx={{ flexGrow: 1 }}>
-          HRMS Portal                                                                 {/* Idhar kiya hai pipeline test change */}
+          HRMS Portal {/* Idhar kiya hai pipeline test change */}
         </Typography>
 
         <Box>
@@ -66,7 +89,6 @@ function Navbar() {
               <Avatar alt="John Doe" src="/static/images/avatar/2.jpg" />
             </IconButton>
           </Tooltip>
-
 
           <Menu
             anchorEl={anchorEl}
@@ -83,12 +105,13 @@ function Navbar() {
             PaperProps={{
               sx: {
                 bgcolor: "#242424",
-                color: "white", 
+                color: "white",
               },
             }}
           >
             <MenuItem
-              onClick={handleClose}
+              onClick={() => handleClose("profile")}
+              name="profile"
               sx={{
                 "&:hover": {
                   backgroundColor: "#1e1e1e",
@@ -98,7 +121,8 @@ function Navbar() {
               Profile
             </MenuItem>
             <MenuItem
-              onClick={handleClose}
+              onClick={() => handleClose("settings")}
+              name="settings"
               sx={{
                 "&:hover": {
                   backgroundColor: "#1e1e1e",
@@ -108,7 +132,8 @@ function Navbar() {
               Settings
             </MenuItem>
             <MenuItem
-              onClick={handleClose}
+              onClick={() => handleClose("logout")}
+              name="logout"
               sx={{
                 "&:hover": {
                   backgroundColor: "#1e1e1e",
@@ -117,10 +142,7 @@ function Navbar() {
             >
               Logout
             </MenuItem>
-
           </Menu>
-
-
         </Box>
       </Toolbar>
     </AppBar>

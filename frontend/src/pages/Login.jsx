@@ -15,6 +15,7 @@ function App() {
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  // const [error, setError] = useState("");
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -61,7 +62,7 @@ function App() {
               // ✅ Redirect to dashboard after login
               navigate("/dashboard", { replace: true });
             } else {
-              setError("Invalid credentials");
+              // setError("Invalid credentials");
             }
             // login(fakeToken);
             // navigate("/dashboard");
