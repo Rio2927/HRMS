@@ -10,6 +10,7 @@ from models.db_models import EmployeeModel
 
 from flask_cors import CORS
 from werkzeug.security import generate_password_hash, check_password_hash
+from werkzeug.utils import secure_filename
 
 import jwt
 import datetime
@@ -27,6 +28,9 @@ app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
 
 # Enable CORS for all routes and origins
 CORS(app)
+
+UPLOAD_FOLDER = "uploads"
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 def get_conn():
     # Force IPv4 to avoid ::1/IPv6 pg_hba mismatch issues
@@ -226,7 +230,23 @@ def login():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+@app.route("/upload", methods=["POST"])
+def upload_file():
+    if "file" not in request.files:
+        return jsonify({"error": "No file part"}), 400
 
+    file = request.files["file"]
+    if file.filename == "":
+        return jsonify({"error": "No selected file"}), 400
+
+    filename = secure_filename(file.filename)
+    save_path = os.path.join(UPLOAD_FOLDER, filename)
+    file.save(save_path)
+
+    print(f"✅ Saved file at: {save_path}")
+    return jsonify({"message": f"File {filename} uploaded successfully!"}), 200
+    # print("✅ Saved")
+    # return jsonify({"message": "File uploaded successfully!"}), 200
 
 
 

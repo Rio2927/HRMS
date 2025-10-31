@@ -65,11 +65,15 @@ import Leaves from "./components/main-body/leaves";
 import Attendance from "./components/main-body/attendance";
 import Payslip from "./components/main-body/payslip";
 import Login from "../src/pages/Login";
+import CreateEmployee from "../src/pages/CreateEmployee";
 import ProtectedRoute from "../src/components/protectedRoute";
 
 function AppContent() {
   const location = useLocation();
-  const hideLayout = location.pathname === "/login";
+  // const hideLayout = location.pathname === "/login";
+
+  const noLayoutRoutes = ["/login", "/create-employee"];
+  const hideLayout = noLayoutRoutes.includes(location.pathname);
 
   return (
     <>
@@ -86,12 +90,62 @@ function AppContent() {
         >
           <Routes>
             <Route path="/login" element={<Login />} />
-              <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-              <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-              <Route path="/salary" element={<ProtectedRoute><Salary /></ProtectedRoute>} />
-              <Route path="/leaves" element={<ProtectedRoute><Leaves /></ProtectedRoute>} />
-              <Route path="/attendance" element={<ProtectedRoute><Attendance /></ProtectedRoute>} />
-              <Route path="/payslip" element={<ProtectedRoute><Payslip /></ProtectedRoute>} />
+            <Route
+              path="/"
+              element={
+                <ProtectedRoute>
+                  <Dashboard />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/create-employee"
+              element={
+                <ProtectedRoute>
+                  <CreateEmployee />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/dashboard"
+              element={
+                <ProtectedRoute>
+                  <Dashboard />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/salary"
+              element={
+                <ProtectedRoute>
+                  <Salary />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/leaves"
+              element={
+                <ProtectedRoute>
+                  <Leaves />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/attendance"
+              element={
+                <ProtectedRoute>
+                  <Attendance />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/payslip"
+              element={
+                <ProtectedRoute>
+                  <Payslip />
+                </ProtectedRoute>
+              }
+            />
           </Routes>
         </Box>
       </Box>
