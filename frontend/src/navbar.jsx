@@ -26,20 +26,20 @@ function Navbar() {
     setAnchorEl(null);
   };
 
-  useEffect(() => {
-    if (hasFetched.current) return;
-    hasFetched.current = true;
+  // useEffect(() => {
+  //   if (hasFetched.current) return;
+  //   hasFetched.current = true;
 
-    console.log("Chal raha hai");
-    axios
-      .get("http://localhost:5000/actors")
-      .then((res) => {
-        console.log("Fetched Actors:", res.data);
-        setActors(res.data);
-        console.log(actors)
-      })
-      .catch((err) => console.error(err));
-  }, []);
+  //   console.log("Chal raha hai");
+  //   axios
+  //     .get("http://localhost:5000/actors")
+  //     .then((res) => {
+  //       console.log("Fetched Actors:", res.data);
+  //       setActors(res.data);
+  //       console.log(actors)
+  //     })
+  //     .catch((err) => console.error(err));
+  // }, []);
 
   return (
     <AppBar

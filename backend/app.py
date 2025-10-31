@@ -11,9 +11,19 @@ from models.db_models import EmployeeModel
 from flask_cors import CORS
 from werkzeug.security import generate_password_hash, check_password_hash
 
+import jwt
+import datetime
+
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
+
 
 
 app = Flask(__name__)
+app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
 
 # Enable CORS for all routes and origins
 CORS(app)
@@ -51,7 +61,43 @@ def get_employees():
         return jsonify({"error": str(e)}), 500
 
 
+# Delete Employee
+@app.route('/delete',methods=['POST'])
+def delete():
+    data = request.get_json()
 
+    employeeID = data.get("id")    
+    # first_name = data.get('first_name')
+    # last_name = data.get('last_name')
+    # password = data.get('password')
+
+    try:
+        # password_hash = generate_password_hash(password)
+        # print("First Name : ",first_name)
+        # print("Last Name  : ",last_name)
+        # print("Hashed PW  : ",password_hash)
+
+        # ✅ Save to PostgreSQL
+        with get_conn() as conn, conn.cursor() as cur:
+            cur.execute('''
+                DELETE FROM public.employees
+                WHERE employee_id = %s
+                RETURNING employee_id
+            ''', (employeeID,))
+            
+            deleted = cur.fetchone()
+            conn.commit()
+
+    except Exception as e:
+        import traceback
+        print("Error occurred:", e)
+        traceback.print_exc()   # ✅ Prints full stack trace
+        return jsonify({"error": str(e)}), 500
+
+    return jsonify({"success" : "true"})
+
+
+# Create Employee
 @app.route('/create',methods=['POST'])
 def create():
     data = request.get_json()
@@ -59,6 +105,7 @@ def create():
     first_name = data.get('first_name')
     last_name = data.get('last_name')
     password = data.get('password')
+    email = data.get('email')
 
     try:
         password_hash = generate_password_hash(password)
@@ -69,10 +116,10 @@ def create():
         # ✅ Save to PostgreSQL
         with get_conn() as conn, conn.cursor() as cur:
             cur.execute('''
-                INSERT INTO public.employees (first_name,last_name, password)
-                VALUES (%s, %s,%s)
+                INSERT INTO public.employees (first_name,last_name, password,email)
+                VALUES (%s, %s,%s,%s)
                 RETURNING employee_id
-            ''', (first_name,last_name,password_hash))
+            ''', (first_name,last_name,password_hash,email))
 
             new_id = cur.fetchone()[0]
             conn.commit()
@@ -86,52 +133,98 @@ def create():
     return jsonify({"success" : "true"})
 
 @app.route('/login', methods=['POST'])
+# def login():
+#     data = request.get_json()
+#     if not data:
+#         return jsonify({'error': 'Invalid JSON'}), 400
+
+#     email = data.get('email')
+#     password = data.get('password')
+
+#     # print("Name : ",name)
+#     # print("Email : ",email)
+
+#     if not email or not password:
+#         return jsonify({'error': 'Email and password required'}), 400
+
+#     try:
+#         with get_conn() as conn, conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
+#             # ✅ Check if employee already exists
+#             cur.execute('SELECT * FROM public.employees WHERE email = %s', (email,))
+#             employee = cur.fetchone()
+#             data = [dict(r) for r in employee]
+#             print("Employee :: ",data)
+#             print("Login API called")
+#             if employee:
+#                 return jsonify({
+#                     'msg': 'Employee already exists',
+#                     'employee_id': employee.get('id'),
+#                     'name': employee.get('name'),
+#                     'email': employee.get('email')
+#                 }), 200
+#             else:
+#                 # ✅ Insert new employee if not exists
+#                 # cur.execute(
+#                 #     'INSERT INTO public."HRMS" (name, email) VALUES (%s, %s) RETURNING id',
+#                 #     (name, password)
+#                 # )
+#                 # new_id = cur.fetchone()['id']
+#                 # conn.commit()
+
+#                 # return jsonify({
+#                 #     'msg': 'New employee created',
+#                 #     'employee_id': new_id,
+#                 #     'name': name,
+#                 #     'password': password
+#                 # }), 201
+#                 return jsonify({'success': False,'msg': 'Employee does not exist'})
+
+#     except Exception as e:
+#         return jsonify({'error': str(e)}), 500
+
 def login():
     data = request.get_json()
     if not data:
         return jsonify({'error': 'Invalid JSON'}), 400
 
-    name = data.get('name')
+    email = data.get('email')
     password = data.get('password')
 
-    # print("Name : ",name)
-    # print("Email : ",email)
-
-    if not name or not password:
-        return jsonify({'error': 'Name and email required'}), 400
+    if not email or not password:
+        return jsonify({'error': 'Email and password required'}), 400
 
     try:
         with get_conn() as conn, conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
-            # ✅ Check if employee already exists
-            cur.execute('SELECT * FROM public."HRMS" WHERE password = %s', (password,))
+            cur.execute('SELECT * FROM public.employees WHERE email = %s', (email,))
             employee = cur.fetchone()
-            print("Login API called")
-            if employee:
+
+            if not employee:
+                return jsonify({'success': False, 'msg': 'Employee does not exist'}), 404
+
+            # 🔐 Compare password hash
+            stored_hash = employee.get('password')
+            if not check_password_hash(stored_hash, password):
+                return jsonify({'success': False, 'msg': 'Invalid password'}), 401
+
+            if check_password_hash(stored_hash, password):
+                # Generate token valid for 1 hour
+                token = jwt.encode({
+                    'employee_id': employee.get('id'),
+                    'email': employee.get('email'),
+                    'exp': datetime.datetime.utcnow() + datetime.timedelta(hours=1)
+                }, app.config['SECRET_KEY'], algorithm='HS256')
+
                 return jsonify({
-                    'msg': 'Employee already exists',
+                    'success': True,
+                    'msg': 'Login successful',
+                    'token': token,
                     'employee_id': employee.get('id'),
                     'name': employee.get('name'),
                     'email': employee.get('email')
                 }), 200
-            else:
-                # ✅ Insert new employee if not exists
-                cur.execute(
-                    'INSERT INTO public."HRMS" (name, email) VALUES (%s, %s) RETURNING id',
-                    (name, password)
-                )
-                new_id = cur.fetchone()['id']
-                conn.commit()
-
-                return jsonify({
-                    'msg': 'New employee created',
-                    'employee_id': new_id,
-                    'name': name,
-                    'password': password
-                }), 201
 
     except Exception as e:
         return jsonify({'error': str(e)}), 500
-
 
 
 

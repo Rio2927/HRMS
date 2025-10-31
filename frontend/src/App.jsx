@@ -65,6 +65,7 @@ import Leaves from "./components/main-body/leaves";
 import Attendance from "./components/main-body/attendance";
 import Payslip from "./components/main-body/payslip";
 import Login from "../src/pages/Login";
+import ProtectedRoute from "../src/components/protectedRoute";
 
 function AppContent() {
   const location = useLocation();
@@ -85,12 +86,12 @@ function AppContent() {
         >
           <Routes>
             <Route path="/login" element={<Login />} />
-            <Route path="/" element={<Dashboard />} />
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/salary" element={<Salary />} />
-            <Route path="/leaves" element={<Leaves />} />
-            <Route path="/attendance" element={<Attendance />} />
-            <Route path="/payslip" element={<Payslip />} />
+              <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+              <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+              <Route path="/salary" element={<ProtectedRoute><Salary /></ProtectedRoute>} />
+              <Route path="/leaves" element={<ProtectedRoute><Leaves /></ProtectedRoute>} />
+              <Route path="/attendance" element={<ProtectedRoute><Attendance /></ProtectedRoute>} />
+              <Route path="/payslip" element={<ProtectedRoute><Payslip /></ProtectedRoute>} />
           </Routes>
         </Box>
       </Box>
