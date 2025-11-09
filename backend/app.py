@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify ,send_from_directory
 import psycopg2
 import psycopg2.extras
 
@@ -12,11 +12,16 @@ from flask_cors import CORS
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 
+from functools import wraps
+
+
 import jwt
 import datetime
 
 import os
 from dotenv import load_dotenv
+# from datetime import datetime
+
 
 load_dotenv()
 
@@ -43,6 +48,51 @@ def get_conn():
     )
 
 
+
+
+
+# Decorator
+# ======================================================================================================================
+# ======================================================================================================================
+    def token_required(f):
+        @wraps(f)
+        def decorated(*args, **kwargs):
+            token = None
+
+            # 🟢 Token must come from Authorization header
+            if 'Authorization' in request.headers:
+                try:
+                    token = request.headers['Authorization'].split(" ")[1]
+                except IndexError:
+                    return jsonify({'error': 'Invalid Authorization header format'}), 401
+
+            if not token:
+                return jsonify({'error': 'Token is missing!'}), 401
+
+            try:
+                # 🧠 This is the CRUCIAL verification step:
+                data = jwt.decode(token, app.config['SECRET_KEY'], algorithms=['HS256'])
+            except jwt.ExpiredSignatureError:
+                return jsonify({'error': 'Token has expired!'}), 401
+            except jwt.InvalidTokenError:
+                return jsonify({'error': 'Invalid token!'}), 401
+
+            # Optionally: make current user ID available
+            return f(data['employee_id'], *args, **kwargs)
+        return decorated
+# ======================================================================================================================
+# ======================================================================================================================
+
+
+# Serving Static Files
+@app.route('/uploads/<path:filename>')
+def uploaded_file(filename):
+    uploads_dir = os.path.join(app.root_path, 'uploads')
+    return send_from_directory(uploads_dir, filename)
+
+
+
+
 @app.route("/ping", methods=["GET"])
 def ping():
     return jsonify({"ok": True})
@@ -52,7 +102,7 @@ def get_employees():
     try:
         with get_conn() as conn, conn.cursor(cursor_factory=psycopg2.extras.DictCursor) as cur:
             # If your table is public.employees:
-            cur.execute('SELECT * FROM public."HRMS"')
+            cur.execute('SELECT * FROM public.employees')
             rows = cur.fetchall()                                                   # List of DictRow objects
             print("Rows = ",rows)                                                   # [{'name': 'Alice', 'department': 'HR'},{'name': 'Bob', 'department': 'IT'}] aisa kuch output hoga
                                                                                     # Har row ko dict (JSON) me convert kar dega
@@ -202,6 +252,7 @@ def login():
             cur.execute('SELECT * FROM public.employees WHERE email = %s', (email,))
             employee = cur.fetchone()
 
+            print("Employee : ",employee)
             if not employee:
                 return jsonify({'success': False, 'msg': 'Employee does not exist'}), 404
 
@@ -213,7 +264,7 @@ def login():
             if check_password_hash(stored_hash, password):
                 # Generate token valid for 1 hour
                 token = jwt.encode({
-                    'employee_id': employee.get('id'),
+                    'employee_id': employee.get('employee_id'),
                     'email': employee.get('email'),
                     'exp': datetime.datetime.utcnow() + datetime.timedelta(hours=1)
                 }, app.config['SECRET_KEY'], algorithm='HS256')
@@ -222,9 +273,10 @@ def login():
                     'success': True,
                     'msg': 'Login successful',
                     'token': token,
-                    'employee_id': employee.get('id'),
-                    'name': employee.get('name'),
-                    'email': employee.get('email')
+                    'employee_id': employee.get('employee_id'),
+                    'name': employee.get('first_name', '') + ' ' + employee.get('last_name', ''),
+                    'email': employee.get('email'),
+                    'avatar': employee.get('profile_image_url')
                 }), 200
 
     except Exception as e:
@@ -232,19 +284,52 @@ def login():
 
 @app.route("/upload", methods=["POST"])
 def upload_file():
+
+    first_name = request.form.get('first_name')
+    last_name = request.form.get('last_name')
+    email = request.form.get('email')
+    password = request.form.get('password')
+    password_hash = generate_password_hash(password)
+    
+    print("Email : ",email)
+    print("Password : ",password)
+    
     if "file" not in request.files:
         return jsonify({"error": "No file part"}), 400
 
-    file = request.files["file"]
+    file = request.files.get("file")
     if file.filename == "":
         return jsonify({"error": "No selected file"}), 400
 
-    filename = secure_filename(file.filename)
-    save_path = os.path.join(UPLOAD_FOLDER, filename)
+    # Sanitize filename to remove spaces or risky characters
+    original_filename = secure_filename(file.filename)
+    extension = os.path.splitext(original_filename)[1]  # .pdf, .jpg, etc.
+
+    timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+    email_prefix = email.split("@")[0]  # 'john.doe@gmail.com' → 'john.doe'
+
+    new_filename = f"{email_prefix}_{timestamp}{extension}"
+    # filename = secure_filename(file.filename)
+    # print("Filename : ",filename)
+    save_path = os.path.join(UPLOAD_FOLDER, new_filename)
+    print("Save path : ",save_path)
     file.save(save_path)
 
+
+
+        # ✅ Save to PostgreSQL
+    with get_conn() as conn, conn.cursor() as cur:
+        cur.execute('''
+            INSERT INTO public.employees (first_name,last_name, password,email,profile_image_url)
+            VALUES (%s, %s,%s,%s,%s)
+            RETURNING employee_id
+            ''', (first_name,last_name,password_hash,email,new_filename))
+
+        new_id = cur.fetchone()[0]
+        conn.commit()
+
     print(f"✅ Saved file at: {save_path}")
-    return jsonify({"message": f"File {filename} uploaded successfully!"}), 200
+    return jsonify({"message": f"File {new_filename} uploaded successfully!"}), 200
     # print("✅ Saved")
     # return jsonify({"message": "File uploaded successfully!"}), 200
 

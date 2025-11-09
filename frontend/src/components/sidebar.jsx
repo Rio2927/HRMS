@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Drawer,
@@ -11,12 +11,27 @@ import {
   Box,
 } from "@mui/material";
 
+import { useContext } from "react";
+import { AuthContext } from "../context/AuthContext";
+
 const drawerWidth = 240;
 
 function Sidebar() {
+  const [name, setName] = useState("");
+  const [avatar, setAvatar] = useState("");
 
-  const navigate = useNavigate()
+  useEffect(() => {
+    setName(localStorage.getItem("name") || null);
+    setAvatar(localStorage.getItem("avatar") || null);
+  },[]);
 
+  // Context
+
+  // Auth
+  const { user } = useContext(AuthContext);
+  console.log("User : ", user);
+
+  const navigate = useNavigate();
 
   const sidebarConfig = [
     { name: "Dashboard", route: "/" },
@@ -29,7 +44,6 @@ function Sidebar() {
   ];
 
   return (
-
     <Drawer
       variant="permanent"
       anchor="left"
@@ -59,20 +73,21 @@ function Sidebar() {
       >
         <Avatar
           alt="John Doe"
-          src="/static/images/avatar/2.jpg"
+          src={`${import.meta.env.VITE_BASE_URL}/uploads/${avatar}`}
+          // src="/static/images/avatar/2.jpg"
           sx={{ width: 64, height: 64, mb: 1 }}
         />
-        <Typography variant="subtitle1">John Doe</Typography>
+        <Typography variant="subtitle1">{name}</Typography>
         <Typography variant="caption">Software Engineer</Typography>
       </Box>
 
       <Box sx={{ overflow: "hidden", flexGrow: 1 }}>
         <List sx={{ cursor: "pointer" }}>
-          {sidebarConfig.map((element,index) => (
+          {sidebarConfig.map((element, index) => (
             <ListItem
               button
               key={index}
-              onClick = {() => navigate(element.route)}
+              onClick={() => navigate(element.route)}
               sx={{
                 paddingLeft: "24px",
                 paddingRight: "24px",

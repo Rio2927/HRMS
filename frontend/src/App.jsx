@@ -67,6 +67,8 @@ import Payslip from "./components/main-body/payslip";
 import Login from "../src/pages/Login";
 import CreateEmployee from "../src/pages/CreateEmployee";
 import ProtectedRoute from "../src/components/protectedRoute";
+import { AuthProvider } from "./context/AuthProvider";
+
 
 function AppContent() {
   const location = useLocation();
@@ -156,7 +158,7 @@ function AppContent() {
 function App() {
   return (
     <Router>
-      <AppContent />
+        <AppContent />
     </Router>
   );
 }

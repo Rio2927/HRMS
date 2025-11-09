@@ -59,6 +59,13 @@ function App() {
               localStorage.setItem("token", data.token);
               // localStorage.setItem("user", res.data.name);
 
+
+              localStorage.setItem("avatar",data.avatar)
+              localStorage.setItem("email",data.email)
+              localStorage.setItem("employee_id",data.employee_id)
+              localStorage.setItem("name",data.name)
+              localStorage.setItem("token",data.token)
+
               // ✅ Redirect to dashboard after login
               navigate("/dashboard", { replace: true });
             } else {
