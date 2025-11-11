@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Typography, Box } from "@mui/material";
 import {
   XAxis,
@@ -32,6 +32,16 @@ import useWidthBelow1024 from "../responsiveCheck";
 // flex-wrap dedo inke parent ko
 
 const Dashboard = () => {
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [employeeID, setEmployeeID] = useState("");
+
+  useEffect(() => {
+    setName(localStorage.getItem("name"));
+    setEmail(localStorage.getItem("email"));
+    setEmployeeID(localStorage.getItem("employee_id"));
+  }, []);
+
   const isBelow1024 = useWidthBelow1024(); // hook runs here
   console.log("hook output:", isBelow1024);
 
@@ -194,8 +204,8 @@ const Dashboard = () => {
             Allocation
           </Typography>
           <Box sx={{ marginTop: "20px" }}>
-            <Typography>John Doe (M274)</Typography>
-            <Typography>Email : john@xyz.com</Typography>
+            <Typography>{name} (M{employeeID})</Typography>
+            <Typography>Email : {email}</Typography>
             <Typography>Designation : Software Engineer</Typography>
             <Typography>Reporting Manager : Andrew Richards</Typography>
           </Box>

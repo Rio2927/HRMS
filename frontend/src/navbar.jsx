@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
 import {
@@ -20,6 +20,12 @@ function Navbar() {
   const navigate = useNavigate();
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
+
+  const [avatar, setAvatar] = useState("");
+
+  useEffect(() => {
+    setAvatar(localStorage.getItem("avatar") || null);
+  }, []);
 
   const handleOpen = (event) => {
     setAnchorEl(event.currentTarget);
@@ -86,7 +92,10 @@ function Navbar() {
         <Box>
           <Tooltip title="User Settings">
             <IconButton onClick={handleOpen}>
-              <Avatar alt="John Doe" src="/static/images/avatar/2.jpg" />
+              <Avatar
+                alt="John Doe"
+                src={`${import.meta.env.VITE_BASE_URL}/uploads/${avatar}`}
+              />
             </IconButton>
           </Tooltip>
 
