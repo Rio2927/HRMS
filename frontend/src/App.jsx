@@ -69,7 +69,6 @@ import CreateEmployee from "../src/pages/CreateEmployee";
 import ProtectedRoute from "../src/components/protectedRoute";
 import { AuthProvider } from "./context/AuthProvider";
 
-
 function AppContent() {
   const location = useLocation();
   // const hideLayout = location.pathname === "/login";
@@ -158,7 +157,9 @@ function AppContent() {
 function App() {
   return (
     <Router>
+      <AuthProvider>
         <AppContent />
+      </AuthProvider>
     </Router>
   );
 }
