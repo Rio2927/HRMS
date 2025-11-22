@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+// import { useNavigate } from "react-router-dom";
 
 import {
   AppBar,
@@ -12,12 +12,15 @@ import {
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 import { Menu, MenuItem } from "@mui/material";
+import { useContext } from "react";
+import { AuthContext } from "./context/AuthContext";
 // import axios from "axios"; // ✅ Make sure axios is installed
 
 function Navbar() {
   // const [actors, setActors] = useState([]);
   // const hasFetched = useRef(false);
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
+  const { logout } = useContext(AuthContext);
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
 
@@ -30,6 +33,10 @@ function Navbar() {
   const handleOpen = (event) => {
     setAnchorEl(event.currentTarget);
   };
+
+  // const handleClose = () => {
+  //   logout();
+  // };
 
   const handleClose = (action) => {
     setAnchorEl(null);
@@ -45,8 +52,7 @@ function Navbar() {
         break;
 
       case "logout":
-        localStorage.clear();
-        navigate("/login", { replace: true });
+        logout()
         break;
 
       default:

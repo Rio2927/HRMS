@@ -13,6 +13,9 @@ import { PieChart, Pie, Cell } from "recharts";
 import { AreaChart, Area } from "recharts";
 import { CircularProgress } from "@mui/material";
 
+import { useContext } from "react";
+import { AuthContext } from "../../context/AuthContext";
+
 import {
   Table,
   TableBody,
@@ -36,11 +39,20 @@ const Dashboard = () => {
   const [email, setEmail] = useState("");
   const [employeeID, setEmployeeID] = useState("");
 
+  const { user } = useContext(AuthContext);
+  console.log("User from dashboard: ", user);
+
   useEffect(() => {
-    setName(localStorage.getItem("name"));
-    setEmail(localStorage.getItem("email"));
-    setEmployeeID(localStorage.getItem("employee_id"));
-  }, []);
+    setName(user.name);
+    setEmail(user.email);
+    setEmployeeID(user.employee_id);
+  }, [user.name, user.email, user.employee_id]);
+
+  // useEffect(() => {
+  //   setName(localStorage.getItem("name"));
+  //   setEmail(localStorage.getItem("email"));
+  //   setEmployeeID(localStorage.getItem("employee_id"));
+  // }, []);
 
   const isBelow1024 = useWidthBelow1024(); // hook runs here
   console.log("hook output:", isBelow1024);
@@ -204,7 +216,9 @@ const Dashboard = () => {
             Allocation
           </Typography>
           <Box sx={{ marginTop: "20px" }}>
-            <Typography>{name} (M{employeeID})</Typography>
+            <Typography>
+              {name} (M{employeeID})
+            </Typography>
             <Typography>Email : {email}</Typography>
             <Typography>Designation : Software Engineer</Typography>
             <Typography>Reporting Manager : Andrew Richards</Typography>

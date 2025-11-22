@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+// import { useNavigate } from "react-router-dom";
+import { useContext } from "react";
 
 import {
   Box,
@@ -10,16 +11,17 @@ import {
   Button,
 } from "@mui/material";
 
-function App() {
-  const navigate = useNavigate();
+import { AuthContext } from "../context/AuthContext";
+
+function Login() {
+  const { login } = useContext(AuthContext);
+  // const navigate = useNavigate();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  // const [error, setError] = useState("");
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // console.log("Working");
   };
 
   const handleEmailChange = (e) => {
@@ -27,65 +29,63 @@ function App() {
   };
   const handlePasswordChange = (e) => setPassword(e.target.value);
 
+  // const handleLogin = () => {
+  //   // console.log()
+  //   // console.log("Email : ", email);
+  //   // console.log("Password : ", password);
+
+  //   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  //   if (!emailRegex.test(email)) {
+  //     // console.log("Email is incorrect");
+  //     return;
+  //   } else {
+  //     // console.log("Email is correct");
+  //     fetch(`${import.meta.env.VITE_BASE_URL}/login`, {
+  //       method: "POST",
+  //       headers: {
+  //         "Content-Type": "Loginlication/json",
+  //       },
+  //       body: JSON.stringify({
+  //         email: email,
+  //         password: password,
+  //       }),
+  //     })
+  //       .then((res) => res.json())
+  //       .then((data) => {
+  //         console.log("Response:", data);
+  //         if (data?.success) {
+  //           console.log("Login successful..");
+  //           // const fakeToken = "12345abc"; // Normally from backend after authentication
+  //           // console.log("Fake Token :: ",fakeToken);
+  //           if (data.token) {
+  //             localStorage.setItem("token", data.token);
+  //             // localStorage.setItem("user", res.data.name);
+
+  //             localStorage.setItem("avatar", data.avatar);
+  //             localStorage.setItem("email", data.email);
+  //             localStorage.setItem("employee_id", data.employee_id);
+  //             localStorage.setItem("name", data.name);
+  //             localStorage.setItem("token", data.token);
+
+  //             // ✅ Redirect to dashboard after login
+  //             navigate("/dashboard", { replace: true });
+  //           } else {
+  //             // setError("Invalid credentials");
+  //           }
+  //           // login(fakeToken);
+  //           // navigate("/dashboard");
+  //         } else {
+  //           alert(data.msg);
+  //           console.log("Login unsuccessful..");
+  //         }
+  //       })
+  //       .catch((err) => console.error("Error:", err));
+  //   }
+  // };
+
   const handleLogin = () => {
-    // console.log()
-    // console.log("Email : ", email);
-    // console.log("Password : ", password);
-
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      // console.log("Email is incorrect");
-      return;
-    } else {
-      // console.log("Email is correct");
-      fetch(`${import.meta.env.VITE_BASE_URL}/login`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          email: email,
-          password: password,
-        }),
-      })
-        .then((res) => res.json())
-        .then((data) => {
-          console.log("Response:", data);
-          if (data?.success) {
-            console.log("Login successful..");
-            // const fakeToken = "12345abc"; // Normally from backend after authentication
-            // console.log("Fake Token :: ",fakeToken);
-            if (data.token) {
-              localStorage.setItem("token", data.token);
-              // localStorage.setItem("user", res.data.name);
-
-
-              localStorage.setItem("avatar",data.avatar)
-              localStorage.setItem("email",data.email)
-              localStorage.setItem("employee_id",data.employee_id)
-              localStorage.setItem("name",data.name)
-              localStorage.setItem("token",data.token)
-
-              // ✅ Redirect to dashboard after login
-              navigate("/dashboard", { replace: true });
-            } else {
-              // setError("Invalid credentials");
-            }
-            // login(fakeToken);
-            // navigate("/dashboard");
-          } else {
-            alert(data.msg);
-            console.log("Login unsuccessful..");
-          }
-        })
-        .catch((err) => console.error("Error:", err));
-    }
+    login(email, password);
   };
-
-  // useEffect(() => {
-  //   console.log("Email : ", email);
-  //   console.log("Password : ", password);
-  // }, [email,password]);
 
   return (
     <Container
@@ -191,4 +191,4 @@ function App() {
   );
 }
 
-export default App;
+export default Login;
