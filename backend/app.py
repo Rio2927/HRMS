@@ -1,340 +1,415 @@
-from flask import Flask, request, jsonify ,send_from_directory
-import psycopg2
-import psycopg2.extras
-
-from models.employee import Employee
-from models.department import Department
-from models.hr_manager import HRManager
-from models.payroll import Payroll
-from models.db_models import EmployeeModel
-
-from flask_cors import CORS
-from werkzeug.security import generate_password_hash, check_password_hash
-from werkzeug.utils import secure_filename
-
-from functools import wraps
-
-
-import jwt
+"""
+HRMS Backend Application
+Human Resource Management System API
+"""
+import os
+import sys
 import datetime
 
-import os
-from dotenv import load_dotenv
-# from datetime import datetime
+# Add backend directory to path for imports
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
+from flask import Flask, request, jsonify, send_from_directory
+from flask_cors import CORS
+from functools import wraps
+from dotenv import load_dotenv
+import psycopg2
+import psycopg2.extras
+from werkzeug.utils import secure_filename
+
+# Import custom utilities
+from utils.logger import get_logger
+from utils.security import (
+    token_required,
+    generate_token,
+    verify_token,
+    hash_password,
+    verify_password,
+    SecurityError
+)
+from database.connection import get_db_connection, close_connection
 
 load_dotenv()
 
-
-
-
+# Initialize Flask app
 app = Flask(__name__)
-app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
+app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'dev-key-change-in-production')
+app.config['MAX_CONTENT_LENGTH'] = int(os.getenv('MAX_FILE_SIZE_MB', 10)) * 1024 * 1024
 
-# Enable CORS for all routes and origins
-CORS(app)
+# Initialize logging
+logger = get_logger(__name__)
 
-UPLOAD_FOLDER = "uploads"
+# Enable CORS with restrictions
+allowed_origins = os.getenv('ALLOWED_ORIGINS', 'http://localhost:5173,http://localhost:3000').split(',')
+CORS(app, 
+     origins=allowed_origins,
+     methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+     allow_headers=["Content-Type", "Authorization"],
+     supports_credentials=True,
+     max_age=3600
+)
+
+# File upload configuration
+UPLOAD_FOLDER = os.getenv('UPLOAD_FOLDER', 'uploads')
+ALLOWED_EXTENSIONS = set(os.getenv('ALLOWED_FILE_EXTENSIONS', 'jpg,jpeg,png,pdf,docx').split(','))
+
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
+logger.info("HRMS Backend Application initialized")
+
+
+# ==================== HELPER FUNCTIONS ====================
+
+def allowed_file(filename):
+    """Check if file extension is allowed."""
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
 
 def get_conn():
-    # Force IPv4 to avoid ::1/IPv6 pg_hba mismatch issues
-    return psycopg2.connect(
-        host="127.0.0.1",
-        port=5432,
-        dbname="HRMS",      # or "hrms" if you created it
-        user="postgres",        # lowercase user we created
-        password="Rohit@2704",
-    )
+    """Get database connection."""
+    try:
+        return get_db_connection()
+    except Exception as e:
+        logger.error(f"Database connection failed: {str(e)}")
+        raise
 
 
-
-
-
-# Decorator
-# ======================================================================================================================
-# ======================================================================================================================
-    def token_required(f):
-        @wraps(f)
-        def decorated(*args, **kwargs):
-            token = None
-
-            # 🟢 Token must come from Authorization header
-            if 'Authorization' in request.headers:
-                try:
-                    token = request.headers['Authorization'].split(" ")[1]
-                except IndexError:
-                    return jsonify({'error': 'Invalid Authorization header format'}), 401
-
-            if not token:
-                return jsonify({'error': 'Token is missing!'}), 401
-
-            try:
-                # 🧠 This is the CRUCIAL verification step:
-                data = jwt.decode(token, app.config['SECRET_KEY'], algorithms=['HS256'])
-            except jwt.ExpiredSignatureError:
-                return jsonify({'error': 'Token has expired!'}), 401
-            except jwt.InvalidTokenError:
-                return jsonify({'error': 'Invalid token!'}), 401
-
-            # Optionally: make current user ID available
-            return f(data['employee_id'], *args, **kwargs)
-        return decorated
-# ======================================================================================================================
-# ======================================================================================================================
-
-
-# Serving Static Files
-@app.route('/uploads/<path:filename>')
-def uploaded_file(filename):
-    uploads_dir = os.path.join(app.root_path, 'uploads')
-    return send_from_directory(uploads_dir, filename)
-
-
-
+# ==================== HEALTH CHECK ====================
 
 @app.route("/ping", methods=["GET"])
 def ping():
-    return jsonify({"ok": True})
-
-@app.route('/employees', methods=['GET'])
-def get_employees():
-    try:
-        with get_conn() as conn, conn.cursor(cursor_factory=psycopg2.extras.DictCursor) as cur:
-            # If your table is public.employees:
-            cur.execute('SELECT * FROM public.employees')
-            rows = cur.fetchall()                                                   # List of DictRow objects
-            print("Rows = ",rows)                                                   # [{'name': 'Alice', 'department': 'HR'},{'name': 'Bob', 'department': 'IT'}] aisa kuch output hoga
-                                                                                    # Har row ko dict (JSON) me convert kar dega
-                                                                                    # Dikhne me pure Python dictionary (JSON) = DictRow but not internally
-            data = [dict(r) for r in rows]                                          # Har row ko JSON (dict in python) me convert karti hai
-            # print("Data => ",data)                                                                          
-        return jsonify(data)
-    except Exception as e:
-        # Return the error so you can see exact cause
-        return jsonify({"error": str(e)}), 500
+    """Health check endpoint."""
+    return jsonify({"status": "ok", "message": "HRMS API is running"}), 200
 
 
-# Delete Employee
-@app.route('/delete',methods=['POST'])
-def delete():
-    data = request.get_json()
 
-    employeeID = data.get("id")    
-    # first_name = data.get('first_name')
-    # last_name = data.get('last_name')
-    # password = data.get('password')
-
-    try:
-        # password_hash = generate_password_hash(password)
-        # print("First Name : ",first_name)
-        # print("Last Name  : ",last_name)
-        # print("Hashed PW  : ",password_hash)
-
-        # ✅ Save to PostgreSQL
-        with get_conn() as conn, conn.cursor() as cur:
-            cur.execute('''
-                DELETE FROM public.employees
-                WHERE employee_id = %s
-                RETURNING employee_id
-            ''', (employeeID,))
-            
-            deleted = cur.fetchone()
-            conn.commit()
-
-    except Exception as e:
-        import traceback
-        print("Error occurred:", e)
-        traceback.print_exc()   # ✅ Prints full stack trace
-        return jsonify({"error": str(e)}), 500
-
-    return jsonify({"success" : "true"})
-
-
-# Create Employee
-@app.route('/create',methods=['POST'])
-def create():
-    data = request.get_json()
-    
-    first_name = data.get('first_name')
-    last_name = data.get('last_name')
-    password = data.get('password')
-    email = data.get('email')
-
-    try:
-        password_hash = generate_password_hash(password)
-        print("First Name : ",first_name)
-        print("Last Name  : ",last_name)
-        print("Hashed PW  : ",password_hash)
-
-        # ✅ Save to PostgreSQL
-        with get_conn() as conn, conn.cursor() as cur:
-            cur.execute('''
-                INSERT INTO public.employees (first_name,last_name, password,email)
-                VALUES (%s, %s,%s,%s)
-                RETURNING employee_id
-            ''', (first_name,last_name,password_hash,email))
-
-            new_id = cur.fetchone()[0]
-            conn.commit()
-
-    except Exception as e:
-        import traceback
-        print("Error occurred:", e)
-        traceback.print_exc()   # ✅ Prints full stack trace
-        return jsonify({"error": str(e)}), 500
-
-    return jsonify({"success" : "true"})
+# ==================== AUTHENTICATION ROUTES ====================
 
 @app.route('/login', methods=['POST'])
-# def login():
-#     data = request.get_json()
-#     if not data:
-#         return jsonify({'error': 'Invalid JSON'}), 400
-
-#     email = data.get('email')
-#     password = data.get('password')
-
-#     # print("Name : ",name)
-#     # print("Email : ",email)
-
-#     if not email or not password:
-#         return jsonify({'error': 'Email and password required'}), 400
-
-#     try:
-#         with get_conn() as conn, conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
-#             # ✅ Check if employee already exists
-#             cur.execute('SELECT * FROM public.employees WHERE email = %s', (email,))
-#             employee = cur.fetchone()
-#             data = [dict(r) for r in employee]
-#             print("Employee :: ",data)
-#             print("Login API called")
-#             if employee:
-#                 return jsonify({
-#                     'msg': 'Employee already exists',
-#                     'employee_id': employee.get('id'),
-#                     'name': employee.get('name'),
-#                     'email': employee.get('email')
-#                 }), 200
-#             else:
-#                 # ✅ Insert new employee if not exists
-#                 # cur.execute(
-#                 #     'INSERT INTO public."HRMS" (name, email) VALUES (%s, %s) RETURNING id',
-#                 #     (name, password)
-#                 # )
-#                 # new_id = cur.fetchone()['id']
-#                 # conn.commit()
-
-#                 # return jsonify({
-#                 #     'msg': 'New employee created',
-#                 #     'employee_id': new_id,
-#                 #     'name': name,
-#                 #     'password': password
-#                 # }), 201
-#                 return jsonify({'success': False,'msg': 'Employee does not exist'})
-
-#     except Exception as e:
-#         return jsonify({'error': str(e)}), 500
-
 def login():
-    data = request.get_json()
-    if not data:
-        return jsonify({'error': 'Invalid JSON'}), 400
-
-    email = data.get('email')
-    password = data.get('password')
-
-    if not email or not password:
-        return jsonify({'error': 'Email and password required'}), 400
-
+    """
+    Employee login endpoint.
+    
+    Expected JSON:
+    {
+        "email": "employee@example.com",
+        "password": "password"
+    }
+    """
     try:
-        with get_conn() as conn, conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
-            cur.execute('SELECT * FROM public.employees WHERE email = %s', (email,))
-            employee = cur.fetchone()
+        data = request.get_json()
+        
+        if not data:
+            logger.warning("Login attempt with invalid JSON")
+            return jsonify({'error': 'Invalid JSON'}), 400
 
-            print("Employee : ",employee)
-            if not employee:
-                return jsonify({'success': False, 'msg': 'Employee does not exist'}), 404
+        email = data.get('email', '').strip()
+        password = data.get('password', '')
 
-            # 🔐 Compare password hash
-            stored_hash = employee.get('password')
-            if not check_password_hash(stored_hash, password):
-                return jsonify({'success': False, 'msg': 'Invalid password'}), 401
+        if not email or not password:
+            logger.warning(f"Login attempt with missing credentials: {email}")
+            return jsonify({'error': 'Email and password are required'}), 400
 
-            if check_password_hash(stored_hash, password):
-                # Generate token valid for 1 hour
-                token = jwt.encode({
-                    'employee_id': employee.get('employee_id'),
-                    'email': employee.get('email'),
-                    'exp': datetime.datetime.utcnow() + datetime.timedelta(hours=1)
-                }, app.config['SECRET_KEY'], algorithm='HS256')
+        conn = get_conn()
+        try:
+            with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
+                cur.execute('SELECT * FROM public.employees WHERE email = %s', (email,))
+                employee = cur.fetchone()
 
+                if not employee:
+                    logger.warning(f"Login failed: employee not found - {email}")
+                    return jsonify({'success': False, 'msg': 'Employee does not exist'}), 404
+
+                # Verify password
+                if not verify_password(employee.get('password'), password):
+                    logger.warning(f"Login failed: invalid password - {email}")
+                    return jsonify({'success': False, 'msg': 'Invalid password'}), 401
+
+                # Generate token
+                token = generate_token(
+                    employee.get('employee_id'),
+                    email,
+                    hours=int(os.getenv('JWT_EXPIRATION_HOURS', 24))
+                )
+
+                logger.info(f"Login successful for employee: {email}")
                 return jsonify({
                     'success': True,
                     'msg': 'Login successful',
                     'token': token,
                     'employee_id': employee.get('employee_id'),
-                    'name': employee.get('first_name', '') + ' ' + employee.get('last_name', ''),
+                    'name': f"{employee.get('first_name', '')} {employee.get('last_name', '')}".strip(),
                     'email': employee.get('email'),
                     'avatar': employee.get('profile_image_url')
                 }), 200
 
+        finally:
+            close_connection(conn)
+
+    except SecurityError as e:
+        logger.error(f"Security error during login: {str(e)}")
+        return jsonify({'error': str(e)}), 401
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        logger.error(f"Login error: {str(e)}", exc_info=True)
+        return jsonify({'error': 'Authentication failed'}), 500
 
-@app.route("/upload", methods=["POST"])
-def upload_file():
 
-    first_name = request.form.get('first_name')
-    last_name = request.form.get('last_name')
-    email = request.form.get('email')
-    password = request.form.get('password')
-    password_hash = generate_password_hash(password)
+# ==================== EMPLOYEE ROUTES ====================
+
+@app.route('/employees', methods=['GET'])
+@token_required
+def get_employees(current_user):
+    """Get all employees (requires authentication)."""
+    try:
+        conn = get_conn()
+        try:
+            with conn.cursor(cursor_factory=psycopg2.extras.DictCursor) as cur:
+                cur.execute('SELECT employee_id, first_name, last_name, email, department, salary FROM public.employees ORDER BY employee_id')
+                rows = cur.fetchall()
+                data = [dict(r) for r in rows]
+                
+                logger.info(f"Retrieved {len(data)} employees")
+                return jsonify(data), 200
+        finally:
+            close_connection(conn)
+
+    except Exception as e:
+        logger.error(f"Error retrieving employees: {str(e)}", exc_info=True)
+        return jsonify({"error": "Failed to retrieve employees"}), 500
+
+
+@app.route('/employees/<int:employee_id>', methods=['GET'])
+@token_required
+def get_employee(current_user, employee_id):
+    """Get single employee by ID."""
+    try:
+        conn = get_conn()
+        try:
+            with conn.cursor(cursor_factory=psycopg2.extras.DictCursor) as cur:
+                cur.execute('SELECT * FROM public.employees WHERE employee_id = %s', (employee_id,))
+                employee = cur.fetchone()
+                
+                if not employee:
+                    return jsonify({"error": "Employee not found"}), 404
+                
+                logger.info(f"Retrieved employee: {employee_id}")
+                return jsonify(dict(employee)), 200
+        finally:
+            close_connection(conn)
+
+    except Exception as e:
+        logger.error(f"Error retrieving employee {employee_id}: {str(e)}", exc_info=True)
+        return jsonify({"error": "Failed to retrieve employee"}), 500
+
+
+@app.route('/create', methods=['POST'])
+def create_employee():
+    """
+    Create new employee with optional file upload.
     
-    print("Email : ",email)
-    print("Password : ",password)
-    
-    if "file" not in request.files:
-        return jsonify({"error": "No file part"}), 400
+    Expected JSON:
+    {
+        "first_name": "John",
+        "last_name": "Doe",
+        "email": "john@example.com",
+        "password": "securepassword",
+        "department": "IT",
+        "salary": 50000
+    }
+    """
+    try:
+        # Handle both JSON and form data
+        if request.is_json:
+            data = request.get_json()
+        else:
+            data = request.form.to_dict()
 
-    file = request.files.get("file")
-    if file.filename == "":
-        return jsonify({"error": "No selected file"}), 400
+        first_name = data.get('first_name', '').strip()
+        last_name = data.get('last_name', '').strip()
+        email = data.get('email', '').strip().lower()
+        password = data.get('password', '')
+        department = data.get('department', '').strip() or None
+        salary = data.get('salary')
 
-    # Sanitize filename to remove spaces or risky characters
-    original_filename = secure_filename(file.filename)
-    extension = os.path.splitext(original_filename)[1]  # .pdf, .jpg, etc.
+        # Validation
+        if not all([first_name, last_name, email, password]):
+            logger.warning("Create employee: missing required fields")
+            return jsonify({'error': 'First name, last name, email, and password are required'}), 400
 
-    timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
-    email_prefix = email.split("@")[0]  # 'john.doe@gmail.com' → 'john.doe'
+        if len(password) < 6:
+            return jsonify({'error': 'Password must be at least 6 characters'}), 400
 
-    new_filename = f"{email_prefix}_{timestamp}{extension}"
-    # filename = secure_filename(file.filename)
-    # print("Filename : ",filename)
-    save_path = os.path.join(UPLOAD_FOLDER, new_filename)
-    print("Save path : ",save_path)
-    file.save(save_path)
+        # Convert salary to float
+        if salary:
+            try:
+                salary = float(salary)
+            except ValueError:
+                return jsonify({'error': 'Invalid salary value'}), 400
+
+        # Hash password
+        try:
+            password_hash = hash_password(password)
+        except SecurityError as e:
+            return jsonify({'error': str(e)}), 400
+
+        # Handle file upload
+        profile_image_url = None
+        if 'file' in request.files:
+            file = request.files['file']
+            if file and file.filename != '' and allowed_file(file.filename):
+                try:
+                    # Create unique filename
+                    timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+                    extension = os.path.splitext(file.filename)[1]
+                    new_filename = f"{email.split('@')[0]}_{timestamp}{extension}"
+                    
+                    filepath = os.path.join(UPLOAD_FOLDER, new_filename)
+                    file.save(filepath)
+                    profile_image_url = new_filename
+                    logger.info(f"File uploaded: {new_filename}")
+                except Exception as e:
+                    logger.error(f"File upload failed: {str(e)}")
+                    return jsonify({'error': 'File upload failed'}), 500
+            elif file and not allowed_file(file.filename):
+                return jsonify({'error': f'File type not allowed. Allowed types: {", ".join(ALLOWED_EXTENSIONS)}'}), 400
+
+        # Create employee
+        conn = get_conn()
+        try:
+            with conn.cursor() as cur:
+                cur.execute('''
+                    INSERT INTO public.employees (first_name, last_name, email, password, department, salary, profile_image_url)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s)
+                    RETURNING employee_id
+                ''', (first_name, last_name, email, password_hash, department, salary, profile_image_url))
+                
+                new_id = cur.fetchone()[0]
+                conn.commit()
+                
+                logger.info(f"Employee created: {new_id} - {email}")
+                return jsonify({
+                    'success': True,
+                    'message': 'Employee created successfully',
+                    'employee_id': new_id
+                }), 201
+
+        finally:
+            close_connection(conn)
+
+    except Exception as e:
+        logger.error(f"Error creating employee: {str(e)}", exc_info=True)
+        return jsonify({'error': 'Failed to create employee'}), 500
 
 
+@app.route('/employees/<int:employee_id>', methods=['PUT'])
+@token_required
+def update_employee(current_user, employee_id):
+    """Update employee information."""
+    try:
+        data = request.get_json()
+        
+        # Validate employee exists
+        conn = get_conn()
+        try:
+            with conn.cursor() as cur:
+                cur.execute('SELECT employee_id FROM public.employees WHERE employee_id = %s', (employee_id,))
+                if not cur.fetchone():
+                    return jsonify({'error': 'Employee not found'}), 404
+                
+                # Build update query dynamically
+                update_fields = []
+                values = []
+                
+                for field in ['first_name', 'last_name', 'email', 'department', 'salary']:
+                    if field in data and data[field] is not None:
+                        update_fields.append(f"{field} = %s")
+                        values.append(data[field])
+                
+                if not update_fields:
+                    return jsonify({'error': 'No fields to update'}), 400
+                
+                values.append(employee_id)
+                query = f"UPDATE public.employees SET {', '.join(update_fields)} WHERE employee_id = %s"
+                
+                cur.execute(query, values)
+                conn.commit()
+                
+                logger.info(f"Employee updated: {employee_id}")
+                return jsonify({'success': True, 'message': 'Employee updated successfully'}), 200
 
-        # ✅ Save to PostgreSQL
-    with get_conn() as conn, conn.cursor() as cur:
-        cur.execute('''
-            INSERT INTO public.employees (first_name,last_name, password,email,profile_image_url)
-            VALUES (%s, %s,%s,%s,%s)
-            RETURNING employee_id
-            ''', (first_name,last_name,password_hash,email,new_filename))
+        finally:
+            close_connection(conn)
 
-        new_id = cur.fetchone()[0]
-        conn.commit()
-
-    print(f"✅ Saved file at: {save_path}")
-    return jsonify({"message": f"File {new_filename} uploaded successfully!"}), 200
-    # print("✅ Saved")
-    # return jsonify({"message": "File uploaded successfully!"}), 200
+    except Exception as e:
+        logger.error(f"Error updating employee {employee_id}: {str(e)}", exc_info=True)
+        return jsonify({'error': 'Failed to update employee'}), 500
 
 
+@app.route('/employees/<int:employee_id>', methods=['DELETE'])
+@token_required
+def delete_employee(current_user, employee_id):
+    """Delete an employee."""
+    try:
+        conn = get_conn()
+        try:
+            with conn.cursor() as cur:
+                cur.execute('DELETE FROM public.employees WHERE employee_id = %s RETURNING employee_id', (employee_id,))
+                deleted = cur.fetchone()
+                
+                if not deleted:
+                    return jsonify({'error': 'Employee not found'}), 404
+                
+                conn.commit()
+                logger.info(f"Employee deleted: {employee_id}")
+                return jsonify({'success': True, 'message': 'Employee deleted successfully'}), 200
+
+        finally:
+            close_connection(conn)
+
+    except Exception as e:
+        logger.error(f"Error deleting employee {employee_id}: {str(e)}", exc_info=True)
+        return jsonify({'error': 'Failed to delete employee'}), 500
+
+
+# ==================== FILE SERVING ====================
+
+@app.route('/uploads/<path:filename>', methods=['GET'])
+def download_file(filename):
+    """Download uploaded file."""
+    try:
+        # Prevent directory traversal
+        filename = secure_filename(filename)
+        return send_from_directory(UPLOAD_FOLDER, filename), 200
+    except Exception as e:
+        logger.error(f"Error serving file {filename}: {str(e)}")
+        return jsonify({'error': 'File not found'}), 404
+
+
+# ==================== ERROR HANDLERS ====================
+
+@app.errorhandler(404)
+def not_found(error):
+    """Handle 404 errors."""
+    logger.warning(f"404 error: {request.url}")
+    return jsonify({'error': 'Endpoint not found'}), 404
+
+
+@app.errorhandler(500)
+def internal_error(error):
+    """Handle 500 errors."""
+    logger.error(f"500 error: {str(error)}", exc_info=True)
+    return jsonify({'error': 'Internal server error'}), 500
+
+
+@app.errorhandler(413)
+def request_entity_too_large(error):
+    """Handle file too large errors."""
+    max_size = os.getenv('MAX_FILE_SIZE_MB', 10)
+    return jsonify({'error': f'File too large. Maximum size: {max_size}MB'}), 413
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000, debug=True)
+    debug_mode = os.getenv('FLASK_ENV') == 'development'
+    logger.info(f"Starting HRMS Backend (Debug: {debug_mode})")
+    app.run(host="0.0.0.0", port=5000, debug=debug_mode)

@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from "react";
 import { AuthContext } from "./AuthContext";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 
 export const AuthProvider = ({ children }) => {
   // const [user, setUser] = useState("Guest");
@@ -12,6 +12,8 @@ export const AuthProvider = ({ children }) => {
   });
 
   const navigate = useNavigate();
+  const location = useLocation();
+
   useEffect(() => {
     console.log("user : ", user);
   }, [user]);
@@ -21,12 +23,12 @@ export const AuthProvider = ({ children }) => {
     navigate("/dashboard", { replace: true });
   }, [navigate]);
 
-  // Run navigation when user updates
+  // Run navigation when user updates - ONLY if on login page
   useEffect(() => {
-    if (user.email) {
+    if (user.email && location.pathname === '/login') {
       navigateToDashboard();
     }
-  }, [user, navigateToDashboard]);
+  }, [user, location.pathname, navigateToDashboard]);
 
   useEffect(() => {
     const savedUser = {
@@ -46,10 +48,11 @@ export const AuthProvider = ({ children }) => {
 
   const login = (email, password) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const baseUrl = import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_BASE_URL || 'http://localhost:5000';
     if (!emailRegex.test(email)) {
       return;
     } else {
-      fetch(`${import.meta.env.VITE_BASE_URL}/login`, {
+      fetch(`${baseUrl}/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

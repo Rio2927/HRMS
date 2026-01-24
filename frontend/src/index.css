@@ -1,40 +1,83 @@
+/**
+ * Global Index Styles
+ * Base styles and typography configuration
+ */
+
 :root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+  /* Color Palette */
+  --primary: #1976d2;
+  --primary-light: #42a5f5;
+  --primary-dark: #1565c0;
+  --secondary: #dc004e;
+  --background: #121212;
+  --surface: #1e1e1e;
+  --surface-variant: #242424;
+  --text-primary: #ffffff;
+  --text-secondary: #b0bec5;
+  --border: rgba(255, 255, 255, 0.1);
+  --border-light: rgba(255, 255, 255, 0.05);
+
+  /* Typography */
+  font-family: 'Roboto', 'Helvetica', 'Arial', sans-serif;
   line-height: 1.5;
   font-weight: 400;
 
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
+  /* Color scheme */
+  color-scheme: dark;
+  color: var(--text-primary);
+  background-color: var(--background);
 
+  /* Font smoothing */
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+
+  /* Transitions */
+  --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-a {
-  font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
+/* === Global Styles === */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
-a:hover {
-  color: #535bf2;
+
+html,
+body,
+#root {
+  height: 100%;
+  width: 100%;
+  margin: 0;
+  padding: 0;
 }
 
 body {
   margin: 0;
-  display: flex;
-  place-items: center;
   min-width: 320px;
   min-height: 100vh;
+  overflow-x: hidden;
 }
 
-h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
+/* === Link Styles === */
+a {
+  font-weight: 500;
+  color: var(--primary-light);
+  text-decoration: none;
+  transition: var(--transition);
 }
 
+a:hover {
+  color: var(--primary);
+  text-decoration: underline;
+}
+
+a:active {
+  opacity: 0.8;
+}
+
+/* === Button Styles === */
 button {
   border-radius: 8px;
   border: 1px solid transparent;
@@ -42,12 +85,214 @@ button {
   font-size: 1em;
   font-weight: 500;
   font-family: inherit;
-  background-color: #1a1a1a;
+  background-color: var(--primary);
+  color: white;
   cursor: pointer;
-  transition: border-color 0.25s;
+  transition: var(--transition);
 }
+
 button:hover {
-  border-color: #646cff;
+  background-color: var(--primary-dark);
+  transform: translateY(-2px);
+}
+
+button:active {
+  opacity: 0.9;
+}
+
+button:disabled {
+  background-color: #424242;
+  color: #666;
+  cursor: not-allowed;
+}
+
+/* === Heading Styles === */
+h1 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+h2 {
+  font-size: 2rem;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+h3 {
+  font-size: 1.75rem;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+h4 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+h5 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  line-height: 1.5;
+}
+
+h6 {
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1.6;
+}
+
+/* === Mobile Responsive Typography === */
+@media (max-width: 600px) {
+  h1 {
+    font-size: 1.75rem;
+  }
+
+  h2 {
+    font-size: 1.5rem;
+  }
+
+  h3 {
+    font-size: 1.25rem;
+  }
+
+  h4 {
+    font-size: 1.1rem;
+  }
+
+  h5 {
+    font-size: 1rem;
+  }
+
+  h6 {
+    font-size: 0.9rem;
+  }
+}
+
+/* === List Styles === */
+ul,
+ol {
+  margin: 1em 0;
+  padding-left: 2em;
+}
+
+li {
+  margin: 0.5em 0;
+}
+
+/* === Table Styles === */
+table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 1em 0;
+}
+
+th,
+td {
+  padding: 0.75em;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+}
+
+th {
+  background-color: var(--surface-variant);
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+tr:hover {
+  background-color: var(--border-light);
+}
+
+/* === Code Styles === */
+code,
+pre {
+  font-family: 'Courier New', monospace;
+  background-color: var(--surface-variant);
+  padding: 0.2em 0.4em;
+  border-radius: 4px;
+  font-size: 0.9em;
+}
+
+pre {
+  padding: 1em;
+  overflow-x: auto;
+  margin: 1em 0;
+}
+
+/* === Form Elements === */
+input,
+textarea,
+select {
+  font-family: inherit;
+  font-size: 1em;
+  padding: 0.75em;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background-color: var(--surface);
+  color: var(--text-primary);
+  transition: var(--transition);
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+  outline: none;
+  border-color: var(--primary);
+  background-color: var(--surface-variant);
+}
+
+input:disabled,
+textarea:disabled,
+select:disabled {
+  background-color: #3a3a3a;
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+/* === Placeholder Text === */
+::placeholder {
+  color: var(--text-secondary);
+  opacity: 0.7;
+}
+
+::-webkit-input-placeholder {
+  color: var(--text-secondary);
+}
+
+::-moz-placeholder {
+  color: var(--text-secondary);
+}
+
+/* === Scrollbar === */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--background);
+}
+
+::-webkit-scrollbar-thumb {
+  background: #424242;
+  border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #616161;
+}
+
+/* === Selection === */
+::selection {
+  background-color: var(--primary);
+  color: white;
+}
+
+::-moz-selection {
+  background-color: var(--primary);
+  color: white;
 }
 button:focus,
 button:focus-visible {

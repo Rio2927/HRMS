@@ -1,7 +1,4 @@
-import { useState } from "react";
-// import { useNavigate } from "react-router-dom";
-import { useContext } from "react";
-
+import { useState, useContext } from 'react';
 import {
   Box,
   Container,
@@ -9,185 +6,280 @@ import {
   Typography,
   TextField,
   Button,
-} from "@mui/material";
+  Alert,
+  CircularProgress,
+  InputAdornment,
+  IconButton,
+} from '@mui/material';
+import { Visibility, VisibilityOff } from '@mui/icons-material';
+import { AuthContext } from '../context/AuthContext';
+import useResponsive from '../hooks/useResponsive';
 
-import { AuthContext } from "../context/AuthContext";
-
+/**
+ * Login Component
+ * Handles user authentication with email and password
+ */
 function Login() {
   const { login } = useContext(AuthContext);
-  // const navigate = useNavigate();
+  const { isMobile } = useResponsive();
 
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = (e) => {
+  /**
+   * Email validation using regex
+   */
+  const isValidEmail = (emailValue) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(emailValue);
+  };
+
+  /**
+   * Handle form submission
+   */
+  const handleSubmit = async (e) => {
     e.preventDefault();
-  };
+    setError('');
 
-  const handleEmailChange = (e) => {
-    setEmail(e.target.value);
-  };
-  const handlePasswordChange = (e) => setPassword(e.target.value);
+    // Validation
+    if (!email || !password) {
+      setError('Please fill in all fields');
+      return;
+    }
 
-  // const handleLogin = () => {
-  //   // console.log()
-  //   // console.log("Email : ", email);
-  //   // console.log("Password : ", password);
+    if (!isValidEmail(email)) {
+      setError('Please enter a valid email address');
+      return;
+    }
 
-  //   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  //   if (!emailRegex.test(email)) {
-  //     // console.log("Email is incorrect");
-  //     return;
-  //   } else {
-  //     // console.log("Email is correct");
-  //     fetch(`${import.meta.env.VITE_BASE_URL}/login`, {
-  //       method: "POST",
-  //       headers: {
-  //         "Content-Type": "Loginlication/json",
-  //       },
-  //       body: JSON.stringify({
-  //         email: email,
-  //         password: password,
-  //       }),
-  //     })
-  //       .then((res) => res.json())
-  //       .then((data) => {
-  //         console.log("Response:", data);
-  //         if (data?.success) {
-  //           console.log("Login successful..");
-  //           // const fakeToken = "12345abc"; // Normally from backend after authentication
-  //           // console.log("Fake Token :: ",fakeToken);
-  //           if (data.token) {
-  //             localStorage.setItem("token", data.token);
-  //             // localStorage.setItem("user", res.data.name);
+    if (password.length < 6) {
+      setError('Password must be at least 6 characters');
+      return;
+    }
 
-  //             localStorage.setItem("avatar", data.avatar);
-  //             localStorage.setItem("email", data.email);
-  //             localStorage.setItem("employee_id", data.employee_id);
-  //             localStorage.setItem("name", data.name);
-  //             localStorage.setItem("token", data.token);
-
-  //             // ✅ Redirect to dashboard after login
-  //             navigate("/dashboard", { replace: true });
-  //           } else {
-  //             // setError("Invalid credentials");
-  //           }
-  //           // login(fakeToken);
-  //           // navigate("/dashboard");
-  //         } else {
-  //           alert(data.msg);
-  //           console.log("Login unsuccessful..");
-  //         }
-  //       })
-  //       .catch((err) => console.error("Error:", err));
-  //   }
-  // };
-
-  const handleLogin = () => {
-    login(email, password);
+    setIsLoading(true);
+    try {
+      await login(email, password);
+    } catch (err) {
+      setError(err.message || 'Login failed. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
-    <Container
-      maxWidth="sm"
+    <Box
       sx={{
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        height: "100vh",
-        "&.MuiContainer-root": {
-          minWidth: "0 !important", // force override
-        },
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        minHeight: '100vh',
+        background: 'linear-gradient(135deg, #121212 0%, #1e1e1e 100%)',
+        padding: { xs: 2, sm: 3 },
       }}
     >
-      <Paper
-        elevation={3}
+      <Container
+        maxWidth="sm"
         sx={{
-          padding: 4,
-          // marginTop: 8,
-          backgroundColor: "#121212",
-          color: "white",
-          borderRadius: "12px",
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          width: '100%',
         }}
       >
-        <Typography variant="h5" gutterBottom align="center">
-          Login
-        </Typography>
+        <Paper
+          elevation={8}
+          sx={{
+            padding: { xs: 3, sm: 4 },
+            backgroundColor: '#1e1e1e',
+            color: 'white',
+            borderRadius: '12px',
+            width: '100%',
+            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)',
+            border: '1px solid rgba(255, 255, 255, 0.1)',
+          }}
+        >
+          {/* Header */}
+          <Box sx={{ textAlign: 'center', mb: 3 }}>
+            <Typography
+              variant="h4"
+              component="h1"
+              gutterBottom
+              sx={{
+                fontWeight: 700,
+                background: 'linear-gradient(135deg, #1976d2, #42a5f5)',
+                backgroundClip: 'text',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                mb: 1,
+                '@media (max-width: 600px)': {
+                  fontSize: '1.75rem',
+                },
+              }}
+            >
+              HRMS Portal
+            </Typography>
+            <Typography variant="body2" sx={{ opacity: 0.7 }}>
+              Employee Management System
+            </Typography>
+          </Box>
 
-        <Box component="form" onSubmit={handleSubmit} sx={{ mt: 2 }}>
-          <TextField
-            fullWidth
-            label="Email"
-            name="email"
-            type="email"
-            value={email}
-            variant="outlined"
-            margin="normal"
-            onChange={handleEmailChange}
-            required
-            InputLabelProps={{
-              style: { color: "#ccc" },
-            }}
-            InputProps={{
-              style: { color: "white", borderColor: "white" },
-            }}
-            sx={{
-              "& .MuiOutlinedInput-root": {
-                "& fieldset": {
-                  borderColor: "white", // default border color
+          {/* Error Alert */}
+          {error && (
+            <Alert
+              severity="error"
+              sx={{
+                mb: 2,
+                backgroundColor: 'rgba(244, 67, 54, 0.1)',
+                color: '#ff6b6b',
+                border: '1px solid rgba(244, 67, 54, 0.3)',
+              }}
+              onClose={() => setError('')}
+            >
+              {error}
+            </Alert>
+          )}
+
+          {/* Login Form */}
+          <Box component="form" onSubmit={handleSubmit} sx={{ mt: 2 }}>
+            {/* Email Field */}
+            <TextField
+              fullWidth
+              label="Email Address"
+              name="email"
+              type="email"
+              value={email}
+              onChange={(e) => {
+                setEmail(e.target.value);
+                setError('');
+              }}
+              margin="normal"
+              variant="outlined"
+              required
+              disabled={isLoading}
+              placeholder="you@example.com"
+              InputLabelProps={{
+                sx: { color: '#b0bec5' },
+              }}
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  color: 'white',
+                  backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                  '& fieldset': {
+                    borderColor: 'rgba(255, 255, 255, 0.2)',
+                  },
+                  '&:hover fieldset': {
+                    borderColor: '#90caf9',
+                  },
+                  '&.Mui-focused fieldset': {
+                    borderColor: '#1976d2',
+                  },
                 },
-                "&:hover fieldset": {
-                  borderColor: "#90caf9", // border on hover
+                mb: 2,
+              }}
+            />
+
+            {/* Password Field */}
+            <TextField
+              fullWidth
+              label="Password"
+              name="password"
+              type={showPassword ? 'text' : 'password'}
+              value={password}
+              onChange={(e) => {
+                setPassword(e.target.value);
+                setError('');
+              }}
+              margin="normal"
+              variant="outlined"
+              required
+              disabled={isLoading}
+              placeholder="Enter your password"
+              InputLabelProps={{
+                sx: { color: '#b0bec5' },
+              }}
+              InputProps={{
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton
+                      aria-label="toggle password visibility"
+                      onClick={() => setShowPassword(!showPassword)}
+                      edge="end"
+                      disabled={isLoading}
+                      sx={{ color: '#90caf9' }}
+                    >
+                      {showPassword ? <VisibilityOff /> : <Visibility />}
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              }}
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  color: 'white',
+                  backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                  '& fieldset': {
+                    borderColor: 'rgba(255, 255, 255, 0.2)',
+                  },
+                  '&:hover fieldset': {
+                    borderColor: '#90caf9',
+                  },
+                  '&.Mui-focused fieldset': {
+                    borderColor: '#1976d2',
+                  },
                 },
-                "&.Mui-focused fieldset": {
-                  borderColor: "#1976d2", // border when focused
+                mb: 3,
+              }}
+            />
+
+            {/* Login Button */}
+            <Button
+              type="submit"
+              variant="contained"
+              fullWidth
+              disabled={isLoading}
+              sx={{
+                mt: 2,
+                py: 1.5,
+                fontSize: '1rem',
+                fontWeight: 600,
+                background: 'linear-gradient(135deg, #1976d2, #1565c0)',
+                textTransform: 'none',
+                borderRadius: '8px',
+                transition: 'all 0.3s ease',
+                '&:hover': {
+                  background: 'linear-gradient(135deg, #1565c0, #0d47a1)',
+                  transform: 'translateY(-2px)',
+                  boxShadow: '0 4px 12px rgba(25, 118, 210, 0.4)',
                 },
-              },
-            }}
-          />
-          <TextField
-            fullWidth
-            label="Password"
-            name="password"
-            type="password"
-            value={password}
-            variant="outlined"
-            margin="normal"
-            onChange={handlePasswordChange}
-            required
-            InputLabelProps={{
-              style: { color: "#ccc" },
-            }}
-            InputProps={{
-              style: { color: "white", borderColor: "white" },
-            }}
-            sx={{
-              "& .MuiOutlinedInput-root": {
-                "& fieldset": {
-                  borderColor: "white", // default border color
+                '&:disabled': {
+                  background: '#424242',
+                  color: '#666',
                 },
-                "&:hover fieldset": {
-                  borderColor: "#90caf9", // border on hover
-                },
-                "&.Mui-focused fieldset": {
-                  borderColor: "#1976d2", // border when focused
-                },
-              },
-            }}
-          />
-          <Button
-            type="submit"
-            variant="contained"
-            color="primary"
-            fullWidth
-            sx={{ mt: 3 }}
-            onClick={handleLogin}
-          >
-            Login
-          </Button>
-        </Box>
-      </Paper>
-    </Container>
+              }}
+            >
+              {isLoading ? (
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <CircularProgress size={20} color="inherit" />
+                  Signing in...
+                </Box>
+              ) : (
+                'Sign In'
+              )}
+            </Button>
+          </Box>
+
+          {/* Footer */}
+          <Box sx={{ mt: 3, textAlign: 'center', borderTop: '1px solid rgba(255, 255, 255, 0.1)', pt: 2 }}>
+            <Typography variant="caption" sx={{ opacity: 0.6 }}>
+              Demo credentials available
+            </Typography>
+          </Box>
+        </Paper>
+      </Container>
+    </Box>
   );
 }
 
