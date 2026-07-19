@@ -100,7 +100,7 @@ function Navbar() {
               },
             }}
           >
-            HRMS Portal 2
+            HRMS Portal
           </Typography>
 
           {/* Desktop Profile Menu */}
