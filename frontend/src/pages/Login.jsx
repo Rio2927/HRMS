@@ -20,7 +20,7 @@ import useResponsive from '../hooks/useResponsive';
  * Handles user authentication with email and password
  */
 function Login() {
-  const { login } = useContext(AuthContext);
+  const { login, loginDemo } = useContext(AuthContext);
   const { isMobile } = useResponsive();
 
   const [email, setEmail] = useState('');
@@ -65,6 +65,21 @@ function Login() {
       await login(email, password);
     } catch (err) {
       setError(err.message || 'Login failed. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleDemoLogin = async () => {
+    setError('');
+    setIsLoading(true);
+    setEmail('demo@hrms.local');
+    setPassword('demo123');
+
+    try {
+      await loginDemo();
+    } catch (err) {
+      setError(err.message || 'Demo login failed. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -269,12 +284,40 @@ function Login() {
                 'Sign In'
               )}
             </Button>
+
+            <Button
+              type="button"
+              variant="outlined"
+              fullWidth
+              disabled={isLoading}
+              onClick={handleDemoLogin}
+              sx={{
+                mt: 1.5,
+                py: 1.25,
+                fontSize: '0.95rem',
+                fontWeight: 600,
+                textTransform: 'none',
+                borderRadius: '8px',
+                borderColor: 'rgba(144, 202, 249, 0.5)',
+                color: '#90caf9',
+                '&:hover': {
+                  borderColor: '#90caf9',
+                  backgroundColor: 'rgba(144, 202, 249, 0.08)',
+                },
+                '&:disabled': {
+                  color: '#666',
+                  borderColor: '#424242',
+                },
+              }}
+            >
+              Use Demo Account
+            </Button>
           </Box>
 
           {/* Footer */}
           <Box sx={{ mt: 3, textAlign: 'center', borderTop: '1px solid rgba(255, 255, 255, 0.1)', pt: 2 }}>
             <Typography variant="caption" sx={{ opacity: 0.6 }}>
-              Demo credentials available
+              Demo account logs in locally (no backend)
             </Typography>
           </Box>
         </Paper>

@@ -11,6 +11,13 @@ export const AuthProvider = ({ children }) => {
     avatar: "",
   });
 
+  const demoUser = {
+    name: "Demo User",
+    email: "demo@hrms.local",
+    employee_id: "DEMO-0001",
+    avatar: "",
+  };
+
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -98,6 +105,24 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const loginDemo = () => {
+    const demoToken = "demo-token";
+    localStorage.setItem("token", demoToken);
+    localStorage.setItem("avatar", demoUser.avatar);
+    localStorage.setItem("email", demoUser.email);
+    localStorage.setItem("employee_id", demoUser.employee_id);
+    localStorage.setItem("name", demoUser.name);
+
+    setUser({
+      name: demoUser.name,
+      email: demoUser.email,
+      employee_id: demoUser.employee_id,
+      avatar: demoUser.avatar,
+    });
+
+    navigate("/dashboard", { replace: true });
+  };
+
   const logout = () => {
     // setAnchorEl(null);
     localStorage.clear();
@@ -105,7 +130,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout }}>
+    <AuthContext.Provider value={{ user, login, loginDemo, logout }}>
       {children}
     </AuthContext.Provider>
   );
